@@ -1,13 +1,13 @@
-resource "aws_s3_bucket" "testsite" {
-  bucket = "laetus-uk-testsite-site"
+resource "aws_s3_bucket" "dsrc_weather" {
+  bucket = "dsrc-weather-laetus-uk-site"
   force_destroy = true
   tags = {
-    Name = "Testsite Bucket"
+    Name = "dsrc-weather Bucket"
   }
 }
 
-resource "aws_s3_bucket_website_configuration" "testsite" {
-  bucket = aws_s3_bucket.testsite.id
+resource "aws_s3_bucket_website_configuration" "dsrc_weather" {
+  bucket = aws_s3_bucket.dsrc_weather.id
 
   index_document {
     suffix = "index.html"
@@ -17,8 +17,8 @@ resource "aws_s3_bucket_website_configuration" "testsite" {
   }
 }
 
-resource "aws_s3_bucket_policy" "testsite_policy" {
-  bucket = aws_s3_bucket.testsite.id
+resource "aws_s3_bucket_policy" "dsrc_weather_policy" {
+  bucket = aws_s3_bucket.dsrc_weather.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -32,10 +32,10 @@ resource "aws_s3_bucket_policy" "testsite_policy" {
         Action = [
           "s3:GetObject"
         ]
-        Resource = "${aws_s3_bucket.testsite.arn}/*"
+        Resource = "${aws_s3_bucket.dsrc_weather.arn}/*"
         Condition = {
           StringEquals = {
-            "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${aws_cloudfront_distribution.testsite.id}"
+            "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${aws_cloudfront_distribution.dsrc_weather.id}"
           }
         }
       }

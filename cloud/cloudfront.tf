@@ -1,25 +1,25 @@
-resource "aws_cloudfront_origin_access_control" "testsite_oac" {
-  name                              = "testsite-oac"
-  description                       = "OAC for testsite S3 bucket"
+resource "aws_cloudfront_origin_access_control" "dsrc_weather_oac" {
+  name                              = "dsrc_weather_oac"
+  description                       = "OAC for dsrc-weather S3 bucket"
   origin_access_control_origin_type  = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
 
-resource "aws_cloudfront_distribution" "testsite" {
+resource "aws_cloudfront_distribution" "dsrc_weather" {
   enabled             = true
-  comment             = "CloudFront for example.com/testsite"
+  comment             = "dsrc_weather.laetus.uk distribution"
   default_root_object = "index.html"
   # CloudFront is a global service, so region doesn't matter (but you can use eu-west-1 provider)
-  depends_on = [aws_acm_certificate_validation.testsite]
+  depends_on = [aws_acm_certificate_validation.dsrc_weather]
 
   origin {
-    domain_name              = aws_s3_bucket.testsite.bucket_regional_domain_name
+    domain_name              = aws_s3_bucket.dsrc_weather.bucket_regional_domain_name
     origin_id                = "testsiteOrigin"
-    origin_access_control_id = aws_cloudfront_origin_access_control.testsite_oac.id
+    origin_access_control_id = aws_cloudfront_origin_access_control.dsrc_weather_oac.id
   }
 
-  aliases = ["testsite.laetus.uk", "laetus.uk", "www.laetus.uk"]
+  aliases = ["dsrc-weather.laetus.uk"]
 
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD", "OPTIONS"]
@@ -41,7 +41,7 @@ resource "aws_cloudfront_distribution" "testsite" {
   price_class = "PriceClass_100"
 
   viewer_certificate {
-    acm_certificate_arn            = aws_acm_certificate_validation.testsite.certificate_arn
+    acm_certificate_arn            = aws_acm_certificate_validation.dsrc_weather.certificate_arn
     ssl_support_method             = "sni-only"
     minimum_protocol_version       = "TLSv1.2_2021"
   }
@@ -53,6 +53,6 @@ resource "aws_cloudfront_distribution" "testsite" {
   }
 
   tags = {
-    Name = "Testsite CloudFront"
+    Name = "dsrc_weather CloudFront"
   }
 }
