@@ -34,8 +34,8 @@ resource "aws_cloudfront_distribution" "dsrc_weather" {
       }
     }
     min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+    default_ttl            = 300
+    max_ttl                = 600
   }
 
   price_class = "PriceClass_100"
@@ -68,4 +68,5 @@ resource "null_resource" "cloudfront_invalidate" {
   triggers = {
     always_run = random_pet.always_run.id
   }
+  depends_on = [null_resource.sync_www_folder]
 }

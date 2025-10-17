@@ -44,3 +44,13 @@ resource "aws_s3_bucket_policy" "dsrc_weather_policy" {
 }
 
 data "aws_caller_identity" "current" {}
+
+resource "null_resource" "sync_www_folder" {
+  provisioner "local-exec" {
+    command = "aws s3 sync ../www s3://${aws_s3_bucket.dsrc_weather.bucket} --delete"
+  }
+
+  triggers = {
+    always_run = random_pet.always_run.id
+  }
+}
