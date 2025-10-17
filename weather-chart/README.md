@@ -1,46 +1,6 @@
-# Wind Speed Chart Application
+# WeatherChart
 
-This Angular application displays a real-time chart of wind speed (in knots) using Chart.js and ng2-charts. The chart fetches wind speed data from a REST API every minute and updates automatically.
-
-## How to Run
-
-1. Install dependencies:
-	```bash
-	npm install
-	```
-2. Start the development server:
-	```bash
-	ng serve
-	```
-3. Open your browser and navigate to [http://localhost:4200](http://localhost:4200).
-
-## How It Works
-
-- The main chart is displayed on the homepage.
-- The app fetches wind speed data from a REST API endpoint every minute.
-- The chart updates in real time as new data arrives.
-- The REST endpoint URL is currently set as a placeholder in `wind-speed-chart.component.ts` (replace `https://example.com/api/wind-speed` with your actual API).
-
-## Customizing the Data Source
-
-Edit the `apiUrl` property in `src/app/wind-speed-chart/wind-speed-chart.component.ts` to point to your REST API. The API should return an array of objects with the following structure:
-
-```
-[
-  { "timestamp": "2025-09-15T10:00:00Z", "speed": 12 },
-  { "timestamp": "2025-09-15T10:01:00Z", "speed": 14 },
-  ...
-]
-```
-
-## Dependencies
-
-- Angular 19+
-- Chart.js v4
-- ng2-charts v4
-# WindSpeedChart
-
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.16.
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.6.
 
 ## Development server
 

@@ -56,3 +56,16 @@ resource "aws_cloudfront_distribution" "dsrc_weather" {
     Name = "dsrc_weather CloudFront"
   }
 }
+
+resource "random_pet" "always_run" {
+  length    = 3
+}
+
+resource "null_resource" "cloudfront_invalidate" {
+  provisioner "local-exec" {
+    command = "aws cloudfront create-invalidation --distribution-id ${aws_cloudfront_distribution.dsrc_weather.id} --paths '/*'"
+  }
+  triggers = {
+    always_run = random_pet.always_run.id
+  }
+}
