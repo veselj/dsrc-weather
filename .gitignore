@@ -3,3 +3,7 @@ terraform.tfstate
 terraform.tfstate.*
 .terraform.lock.hcl
 .idea/
+*/bin/*
+.DS_Store
+cloud/.DS_Store
+cloud/*.zip
