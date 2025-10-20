@@ -1,5 +1,14 @@
-build:
+build: build-lambda build-chart
+	echo "Build complete."
+
+build-chart:
 	cd weather-chart && npm run build && npm run ship
+
+build-lambda:
+	rm -f weather-data/bin/bootstrap
+	rm -f cloud/weather-data.zip
+	cd weather-data && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -tags lambda.norpc -o bin/bootstrap main.go
+
 plan:
 	cd cloud && terraform init
 	cd cloud && terraform plan
