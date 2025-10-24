@@ -6,6 +6,7 @@ resource "aws_lambda_function" "weather_data" {
   architectures = ["x86_64"]
   role          = aws_iam_role.lambda_data_exec.arn
   filename      = data.archive_file.lambda_data_zip.output_path
+  source_code_hash = data.archive_file.lambda_data_zip.output_base64sha256
   # ...other config...
   depends_on = [data.archive_file.lambda_data_zip]
 }

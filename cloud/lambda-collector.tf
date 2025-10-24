@@ -24,6 +24,7 @@ resource "aws_lambda_function" "weather_collector" {
   architectures = ["x86_64"]
   role          = aws_iam_role.lambda_collector_exec.arn
   filename      = data.archive_file.lambda_collector_zip.output_path
+  source_code_hash = data.archive_file.lambda_collector_zip.output_base64sha256
   # ...other config...
   depends_on = [data.archive_file.lambda_collector_zip]
 }
@@ -60,3 +61,25 @@ data "archive_file" "lambda_collector_zip" {
   output_path = "${path.module}/weather-collector.zip"
 }
 
+resource "aws_iam_policy" "lambda_collector_dynamodb_rw" {
+  name        = "lambda_collector_dynamodb_rw"
+  description = "Allow PutItem and GetItem on the weather table"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem"
+        ]
+        Resource = aws_dynamodb_table.weather_samples.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_collector_dynamodb_rw" {
+  role       = aws_iam_role.lambda_collector_exec.name
+  policy_arn = aws_iam_policy.lambda_collector_dynamodb_rw.arn
+}

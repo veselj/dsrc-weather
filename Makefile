@@ -19,6 +19,7 @@ plan:
 	cd cloud && terraform plan
 
 deploy: build confirm
+	rm -f cloud\weather-data.zip cloud\weather-collector.zip
 	cd cloud && terraform plan
 	cd cloud && terraform apply -auto-approve
 
