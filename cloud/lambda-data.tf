@@ -4,13 +4,13 @@ resource "aws_lambda_function" "weather_data" {
   handler       = "bootstrap"
   runtime       = "provided.al2023"
   architectures = ["x86_64"]
-  role          = aws_iam_role.lambda_exec.arn
-  filename      = data.archive_file.lambda_zip.output_path
+  role          = aws_iam_role.lambda_data_exec.arn
+  filename      = data.archive_file.lambda_data_zip.output_path
   # ...other config...
-  depends_on = [data.archive_file.lambda_zip]
+  depends_on = [data.archive_file.lambda_data_zip]
 }
-resource "aws_iam_role" "lambda_exec" {
-  name = "lambda_exec_role"
+resource "aws_iam_role" "lambda_data_exec" {
+  name = "lambda_data_exec_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -26,7 +26,17 @@ resource "aws_iam_role" "lambda_exec" {
   })
 }
 
-data "archive_file" "lambda_zip" {
+resource "aws_iam_role_policy_attachment" "lambda_data_logs" {
+  role       = aws_iam_role.lambda_data_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_cloudwatch_log_group" "weather_data" {
+  name              = "/aws/lambda/weather-data"
+  retention_in_days = 14
+}
+
+data "archive_file" "lambda_data_zip" {
   type        = "zip"
   source_file = "${path.module}/../weather-data/bin/bootstrap"
   output_path = "${path.module}/weather-data.zip"
