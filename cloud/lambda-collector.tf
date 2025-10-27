@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_event_rule" "weather_collector_schedule" {
   name                = "weather-collector-schedule"
-  schedule_expression = "rate(5 minutes)"
+  schedule_expression = "rate(1 minute)"
 }
 
 resource "aws_cloudwatch_event_target" "weather_collector_target" {
@@ -17,14 +17,27 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_invoke" {
   source_arn    = aws_cloudwatch_event_rule.weather_collector_schedule.arn
 }
 
+variable collector_lambda_function_name {
+  type    = string
+  default = "weather-collector"
+}
+
 resource "aws_lambda_function" "weather_collector" {
-  function_name = "weather-collector"
+  function_name = var.collector_lambda_function_name
   handler       = "bootstrap"
   runtime       = "provided.al2023"
   architectures = ["x86_64"]
   role          = aws_iam_role.lambda_collector_exec.arn
   filename      = data.archive_file.lambda_collector_zip.output_path
   source_code_hash = data.archive_file.lambda_collector_zip.output_base64sha256
+  timeout = 60 # Timeout in seconds
+
+  # environment {
+  #   variables = {
+  #     AWS_LAMBDA_FUNCTION_NAME = var.collector_lambda_function_name
+  #   }
+  # }
+
   # ...other config...
   depends_on = [data.archive_file.lambda_collector_zip]
 }
@@ -82,4 +95,26 @@ resource "aws_iam_policy" "lambda_collector_dynamodb_rw" {
 resource "aws_iam_role_policy_attachment" "lambda_collector_dynamodb_rw" {
   role       = aws_iam_role.lambda_collector_exec.name
   policy_arn = aws_iam_policy.lambda_collector_dynamodb_rw.arn
+}
+
+resource "aws_iam_policy" "lambda_collector_invoke_lambda" {
+  name        = "lambda_collector_invoke_lambda"
+  description = "Allow invoking Lambda functions"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunction"
+        ]
+        Resource = aws_lambda_function.weather_collector.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_collector_invoke_lambda" {
+  role       = aws_iam_role.lambda_collector_exec.name
+  policy_arn = aws_iam_policy.lambda_collector_invoke_lambda.arn
 }

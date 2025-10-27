@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -41,6 +42,7 @@ func (c *DynamoClient) PutSample(ctx context.Context, s *record.Sample) error {
 		Temperature float64 `dynamodbav:"Temperature"`
 		FeelsLike   float64 `dynamodbav:"FeelsLike"`
 		When        int64   `dynamodbav:"When"`
+		ExpiresAt   int64   `dynamodbav:"expires_at"`
 	}{
 		Bucket:      s.Bucket,
 		Wind:        s.Wind,
@@ -48,6 +50,7 @@ func (c *DynamoClient) PutSample(ctx context.Context, s *record.Sample) error {
 		Temperature: s.Temperature,
 		FeelsLike:   s.FeelsLike,
 		When:        s.When,
+		ExpiresAt:   time.Now().Add(time.Hour * 24 * 14).Unix(), // 14 days expiration
 	})
 	if err != nil {
 		return err
@@ -67,6 +70,6 @@ func Save(sample *record.Sample) error {
 		log.Printf("failed to put sample, %+v", err)
 		return err
 	}
-	log.Printf("Savedsample: %+v", sample)
+	log.Printf("Saved sample: %+v", sample)
 	return nil
 }

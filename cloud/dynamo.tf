@@ -18,6 +18,10 @@ resource "aws_dynamodb_table" "weather_samples" {
     type = "N"
   }
 
+  ttl {
+    attribute_name = "expires_at"
+    enabled        = true
+  }
   tags = {
     Environment = "dev"
     Name        = "WeatherSamples"

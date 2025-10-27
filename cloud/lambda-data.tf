@@ -7,6 +7,7 @@ resource "aws_lambda_function" "weather_data" {
   role          = aws_iam_role.lambda_data_exec.arn
   filename      = data.archive_file.lambda_data_zip.output_path
   source_code_hash = data.archive_file.lambda_data_zip.output_base64sha256
+  timeout = 10 # Timeout in seconds
   # ...other config...
   depends_on = [data.archive_file.lambda_data_zip]
 }
