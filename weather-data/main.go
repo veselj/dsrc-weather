@@ -1,14 +1,17 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/veselj/dsrc-weather/internal/record"
 	"github.com/veselj/dsrc-weather/internal/store"
-	"github.com/veselj/dsrc-weather/weather-collector/weather/record"
 )
 
 func handler(ctx context.Context, req events.LambdaFunctionURLRequest) (events.LambdaFunctionURLResponse, error) {
@@ -19,12 +22,23 @@ func handler(ctx context.Context, req events.LambdaFunctionURLRequest) (events.L
 	if err != nil {
 		jsonBody = []byte(err.Error())
 	}
+
+	var b bytes.Buffer
+	gz := gzip.NewWriter(&b)
+	gz.Write(jsonBody)
+	gz.Close()
+
+	// Base64 encode
+	gzippedBase64 := base64.StdEncoding.EncodeToString(b.Bytes())
+
 	return events.LambdaFunctionURLResponse{
 		StatusCode: 200,
 		Headers: map[string]string{
-			"Content-Type": "text/plain",
+			"Content-Type":     "application/json",
+			"Content-Encoding": "gzip",
 		},
-		Body: string(jsonBody),
+		Body:            gzippedBase64,
+		IsBase64Encoded: true,
 	}, nil
 }
 
@@ -35,7 +49,7 @@ func main() {
 func retrieveSamples(ctx context.Context, fromUnix int64) []record.Sample {
 	dynamo := store.NewDynamoClient()
 	startTimes := store.GetHourlyBucketStarts(fromUnix)
-	var retrieved []record.Sample
+	retrieved := []record.Sample{}
 	for _, startTime := range startTimes {
 		s := dynamo.Samples(ctx, startTime)
 		retrieved = append(retrieved, s...)

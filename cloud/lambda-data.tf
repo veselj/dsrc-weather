@@ -51,7 +51,7 @@ resource "aws_lambda_function_url" "weather_data_url" {
   cors {
     allow_origins  = ["*"]
     allow_methods  = ["GET"]
-    allow_headers  = ["Content-Type"]
+    allow_headers  = ["content-type"]
     expose_headers    = ["keep-alive", "date"]
     max_age           = 86400
   }

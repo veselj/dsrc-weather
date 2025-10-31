@@ -11,9 +11,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	awslambda "github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
+	"github.com/veselj/dsrc-weather/internal/record"
 	"github.com/veselj/dsrc-weather/internal/store"
 
-	"github.com/veselj/dsrc-weather/weather-collector/weather/record"
 	"github.com/veselj/dsrc-weather/weather-collector/weather/station"
 )
 

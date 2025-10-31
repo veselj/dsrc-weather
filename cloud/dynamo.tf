@@ -5,16 +5,16 @@ resource "aws_dynamodb_table" "weather_samples" {
   read_capacity  = 3
   write_capacity = 3
 
-  hash_key       = "Bucket"
-  range_key      = "When"
+  hash_key       = "Bt"
+  range_key      = "Wn"
 
   attribute {
-    name = "Bucket"
+    name = "Bt"
     type = "S"
   }
 
   attribute {
-    name = "When"
+    name = "Wn"
     type = "N"
   }
 

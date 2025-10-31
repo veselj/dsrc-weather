@@ -12,12 +12,12 @@ func AsSample(w *station.WeatherData) *Sample {
 	feelsLike := asDegrees(w.TemperatureFeelLike)
 	now := time.Now()
 	rv := &Sample{
-		Wind:        asKnots(w.Wind, w.WindUnits),
-		Direction:   w.WindDirection,
-		Temperature: temper,
-		FeelsLike:   feelsLike,
-		Bucket:      asBucket(now),
-		When:        now.Unix(),
+		Wd: asKnots(w.Wind, w.WindUnits),
+		Dn: w.WindDirection,
+		Te: temper,
+		Fl: feelsLike,
+		Bt: asBucket(now),
+		Wn: now.Unix(),
 	}
 	return rv
 }

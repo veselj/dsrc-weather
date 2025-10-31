@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/veselj/dsrc-weather/weather-collector/weather/record"
+	"github.com/veselj/dsrc-weather/internal/record"
 )
 
 const (
@@ -38,21 +38,21 @@ func NewDynamoClient() *DynamoClient {
 
 func (c *DynamoClient) PutSample(ctx context.Context, s *record.Sample) error {
 	item, err := attributevalue.MarshalMap(struct {
-		Bucket      string  `dynamodbav:"Bucket"`
-		Wind        float64 `dynamodbav:"Wind"`
-		Direction   int     `dynamodbav:"Direction"`
-		Temperature float64 `dynamodbav:"Temperature"`
-		FeelsLike   float64 `dynamodbav:"FeelsLike"`
-		When        int64   `dynamodbav:"When"`
-		ExpiresAt   int64   `dynamodbav:"expires_at"`
+		Bt        string  `dynamodbav:"Bt"`
+		Wd        float64 `dynamodbav:"Wd"`
+		Dn        int     `dynamodbav:"Dn"`
+		Te        float64 `dynamodbav:"Te"`
+		Fl        float64 `dynamodbav:"Fl"`
+		Wn        int64   `dynamodbav:"Wn"`
+		ExpiresAt int64   `dynamodbav:"expires_at"`
 	}{
-		Bucket:      s.Bucket,
-		Wind:        s.Wind,
-		Direction:   s.Direction,
-		Temperature: s.Temperature,
-		FeelsLike:   s.FeelsLike,
-		When:        s.When,
-		ExpiresAt:   time.Now().Add(time.Hour * 24 * 14).Unix(), // 14 days expiration
+		Bt:        s.Bt,
+		Wd:        s.Wd,
+		Dn:        s.Dn,
+		Te:        s.Te,
+		Fl:        s.Fl,
+		Wn:        s.Wn,
+		ExpiresAt: time.Now().Add(time.Hour * 24 * 14).Unix(), // 14 days expiration
 	})
 	if err != nil {
 		return err
@@ -84,8 +84,8 @@ func (c *DynamoClient) Samples(ctx context.Context, fromUnix int64) []record.Sam
 	// Build expression for PK and range key between two values
 	keyCond := "#PK = :pk AND #SK >= :startSK"
 	exprAttrNames := map[string]string{
-		"#PK": "Bucket",
-		"#SK": "When",
+		"#PK": "Bt",
+		"#SK": "Wn",
 	}
 	exprAttrValues := map[string]types.AttributeValue{
 		":pk":      &types.AttributeValueMemberS{Value: partitionKeyValue},
@@ -103,11 +103,10 @@ func (c *DynamoClient) Samples(ctx context.Context, fromUnix int64) []record.Sam
 		log.Fatalf("Query API call failed: %v", err)
 
 	}
-	var samples []record.Sample
+	samples := []record.Sample{}
 	err = attributevalue.UnmarshalListOfMaps(result.Items, &samples)
 	if err != nil {
 		log.Printf("failed to unmarshal items: %v", err)
-		return nil
 	}
 	return samples
 }

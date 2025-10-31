@@ -1,12 +1,12 @@
 package record
 
 type Sample struct {
-	Wind        float64
-	Direction   int
-	Temperature float64
-	FeelsLike   float64
-	When        int64 // Unix timestamp
-	Bucket      string
+	Wd float64
+	Dn int
+	Te float64
+	Fl float64
+	Wn int64 // Unix timestamp
+	Bt string
 }
 
 const (
