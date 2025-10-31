@@ -3,12 +3,14 @@ package store
 import (
 	"context"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/veselj/dsrc-weather/weather-collector/weather/record"
 )
 
@@ -72,4 +74,55 @@ func Save(sample *record.Sample) error {
 	}
 	log.Printf("Saved sample: %+v", sample)
 	return nil
+}
+
+func (c *DynamoClient) Samples(ctx context.Context, fromUnix int64) []record.Sample {
+	// Query parameters
+	partitionKeyValue := time.Unix(fromUnix, 0).Format(record.BucketFormat)
+	startRangeKey := fromUnix
+
+	// Build expression for PK and range key between two values
+	keyCond := "#PK = :pk AND #SK >= :startSK"
+	exprAttrNames := map[string]string{
+		"#PK": "Bucket",
+		"#SK": "When",
+	}
+	exprAttrValues := map[string]types.AttributeValue{
+		":pk":      &types.AttributeValueMemberS{Value: partitionKeyValue},
+		":startSK": &types.AttributeValueMemberN{Value: strconv.FormatInt(startRangeKey, 10)},
+	}
+
+	// Execute query
+	result, err := c.client.Query(context.TODO(), &dynamodb.QueryInput{
+		TableName:                 aws.String(c.tableName),
+		KeyConditionExpression:    aws.String(keyCond),
+		ExpressionAttributeNames:  exprAttrNames,
+		ExpressionAttributeValues: exprAttrValues,
+	})
+	if err != nil {
+		log.Fatalf("Query API call failed: %v", err)
+
+	}
+	var samples []record.Sample
+	err = attributevalue.UnmarshalListOfMaps(result.Items, &samples)
+	if err != nil {
+		log.Printf("failed to unmarshal items: %v", err)
+		return nil
+	}
+	return samples
+}
+
+func GetHourlyBucketStarts(fromUnix int64) []int64 {
+	startBucketTime := time.Unix(fromUnix, 0).Truncate(time.Hour)
+	fromUnixTime := time.Unix(fromUnix, 0)
+	now := time.Now().Truncate(time.Hour)
+	duration := now.Sub(startBucketTime)
+	hours := int(duration.Hours())
+	fromTimes := make([]int64, 0, hours+1)
+	fromTimes = append(fromTimes, fromUnix)
+	for i := 1; i <= hours; i++ {
+		t := fromUnixTime.Add(time.Duration(i) * time.Hour).Truncate(time.Hour).Unix()
+		fromTimes = append(fromTimes, t)
+	}
+	return fromTimes
 }

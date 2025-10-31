@@ -56,3 +56,26 @@ resource "aws_lambda_function_url" "weather_data_url" {
     max_age           = 86400
   }
 }
+
+resource "aws_iam_policy" "lambda_data_dynamodb_r" {
+  name        = "lambda_data_dynamodb_r"
+  description = "Allow GetItem on the weather table"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:Query"
+        ]
+        Resource = aws_dynamodb_table.weather_samples.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_data_dynamodb_r" {
+  role       = aws_iam_role.lambda_data_exec.name
+  policy_arn = aws_iam_policy.lambda_data_dynamodb_r.arn
+}

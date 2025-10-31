@@ -24,7 +24,7 @@ func AsSample(w *station.WeatherData) *Sample {
 
 // Hourly buckets
 func asBucket(t time.Time) string {
-	return t.Format("2006010215")
+	return t.Format(BucketFormat)
 }
 
 func asDegrees(temper string) float64 {

@@ -8,3 +8,7 @@ type Sample struct {
 	When        int64 // Unix timestamp
 	Bucket      string
 }
+
+const (
+	BucketFormat = "2006010215"
+)
