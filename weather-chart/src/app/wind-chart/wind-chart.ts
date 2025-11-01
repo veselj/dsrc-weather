@@ -100,16 +100,31 @@ export class WindChart {
   }
 
   getChartDataSet(hoursBack: number): ChartConfiguration<'line'>['data'] {
+
+    const samples = this.getWindSpeedData(this.retrievedData, hoursBack);
+    const count = samples.length;
+    const averageWindSpeed = samples
+      .reduce((sum, point) => sum + point.y, 0) / count;
+
     return {
       datasets: [
         {
           label: 'Wind Speed (knots)',
-          data: this.getWindSpeedData(this.retrievedData, hoursBack),
+          data: samples,
           fill: false,
           tension: 0.3,
           borderColor: '#1976d2',
           backgroundColor: 'rgba(25, 118, 210, 0.2)',
           pointBackgroundColor: '#1976d2'
+        },
+        {
+          label: 'Average Wind Speed (knots)',
+          data: samples.map(point => ({ x: point.x, y: averageWindSpeed })),
+          fill: false,
+          borderDash: [5, 5],
+          borderColor: '#ff5722',
+          backgroundColor: 'rgba(255, 87, 34, 0.2)',
+          pointBackgroundColor: '#ff5722'
         }
       ]
     };
