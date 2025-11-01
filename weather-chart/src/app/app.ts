@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, NgModule } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {WindChart} from './wind-chart/wind-chart';
 

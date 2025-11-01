@@ -1,5 +1,10 @@
 <h2>Wind Speed at Grassy Beach</h2>
-<button (click)="toggleGranularity()">Toggle Granularity</button>
+<div>
+  @for (option of historyOptions; track option) {
+    <button [class.active]="hoursBack === option" (click)="setHistory(option)">
+      {{ option === 0.5 ? '30 Minutes' : option + ' Hour' + (option > 1 ? 's' : '') }}</button>
+  }
+</div>
 <div style="display: block;">
     <canvas baseChart
             [data]="windChartData"

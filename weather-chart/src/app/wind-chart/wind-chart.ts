@@ -14,7 +14,7 @@ import {WeatherData, WindChartDataService} from '../services/wind-chart-data-ser
 export class WindChart {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective; // Declare chart property
 
-  public granularity: 'minute' | 'hour' = 'minute'; // Granularity control
+  public granularity: 'minute' | 'hour' = 'hour'; // Granularity control
   public hoursBack: number = 6; // Hours back for data retrieval
   public windChartData: ChartConfiguration<'line'>['data'] = {
     datasets: []
@@ -101,4 +101,13 @@ export class WindChart {
       ]
     };
   }
+
+  setHistory(hours: number): void {
+    this.hoursBack = hours;
+    this.windChartData = this.getChartDataSet(this.hoursBack);
+    this.chart?.update(); // Trigger chart update
+  }
+
+  public historyOptions: number[] = [0.5, 1, 3, 6]; // Options for history
+
 }
