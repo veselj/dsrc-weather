@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"time"
+	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -17,6 +18,14 @@ import (
 func handler(ctx context.Context, req events.LambdaFunctionURLRequest) (events.LambdaFunctionURLResponse, error) {
 
 	from := time.Now().Add(-time.Hour * 3)
+
+    if hoursStr, ok := req.QueryStringParameters["hours"]; ok {
+        hours, err := strconv.ParseInt(hoursStr, 10, 64)
+        if err == nil {
+            from = time.Now().Add(-time.Hour * time.Duration(hours))
+        }
+    }
+
 	samples := retrieveSamples(ctx, from.Unix())
 	jsonBody, err := json.Marshal(samples)
 	if err != nil {

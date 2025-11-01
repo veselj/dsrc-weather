@@ -56,6 +56,6 @@ resource "null_resource" "sync_www_folder" {
   }
 
   triggers = {
-    always_run = random_pet.always_copy.id
+    folder_hash = sha1(join("", fileset("../www", "**/*")))
   }
 }

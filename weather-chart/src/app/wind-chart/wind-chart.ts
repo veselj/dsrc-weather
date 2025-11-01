@@ -4,6 +4,8 @@ import {ChartConfiguration, TimeScaleOptions} from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import {WeatherData, WindChartDataService} from '../services/wind-chart-data-service';
 
+type GranularityType = 'minute' | 'hour';
+
 @Component({
   selector: 'app-wind-chart',
   standalone: true,
@@ -72,6 +74,17 @@ export class WindChart {
     this.chart?.update(); // Trigger chart update
   }
 
+  setGranularity(granularity :GranularityType): void {
+    this.granularity = granularity
+    const xScale = this.windChartOptions?.scales?.['x'] as TimeScaleOptions;
+    if (xScale?.time) {
+      xScale.time.unit = this.granularity;
+    }
+    // Reassign the options object to trigger Angular change detection
+    this.windChartOptions = { ...this.windChartOptions };
+    this.chart?.update(); // Trigger chart update
+  }
+
   getWindSpeedData(data: WeatherData[], hoursBack: number) {
 
     let hoursBackDateTime = Date.now() - hoursBack * 3600 * 1000;
@@ -105,6 +118,8 @@ export class WindChart {
   setHistory(hours: number): void {
     this.hoursBack = hours;
     this.windChartData = this.getChartDataSet(this.hoursBack);
+    let granularity: GranularityType = hours <= 1 ? 'minute' : 'hour';
+    this.setGranularity(granularity);
     this.chart?.update(); // Trigger chart update
   }
 

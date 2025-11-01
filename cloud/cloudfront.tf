@@ -66,7 +66,7 @@ resource "null_resource" "cloudfront_invalidate" {
     command = "aws cloudfront create-invalidation --distribution-id ${aws_cloudfront_distribution.dsrc_weather.id} --paths '/*'"
   }
   triggers = {
-    always_run = random_pet.always_run.id
+    folder_hash = sha1(join("", fileset("../www", "**/*")))
   }
   depends_on = [null_resource.sync_www_folder]
 }
