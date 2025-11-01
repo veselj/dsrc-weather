@@ -20,7 +20,14 @@ export class WindChartDataService {
 
   constructor(private http: HttpClient) {}
 
-  getData(): Observable<any> {
-    return this.http.get<any>(this.apiUrl);
+
+  getData(hourSpan?: number): Observable<WeatherData[]> {
+   let url: string;
+    if (hourSpan) {
+      url = `${this.apiUrl}?hours=${hourSpan}`;
+    } else {
+      url = this.apiUrl;
+    }
+    return this.http.get<WeatherData[]>(url);
   }
 }

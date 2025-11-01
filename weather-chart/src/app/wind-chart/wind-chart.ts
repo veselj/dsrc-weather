@@ -15,6 +15,7 @@ export class WindChart {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective; // Declare chart property
 
   public granularity: 'minute' | 'hour' = 'minute'; // Granularity control
+  public hoursBack: number = 6; // Hours back for data retrieval
   public windChartData: ChartConfiguration<'line'>['data'] = {
     datasets: []
   };
@@ -37,12 +38,6 @@ export class WindChart {
       },
       x: {
         type: 'time',
-        // adapters: {
-        //   date: {
-        //     // Use Unix time (seconds) for parsing
-        //     parse: (value: number) => new Date(value * 1000)
-        //   }
-        // },
         time: {
           unit: this.granularity, // Dynamically set granularity
           displayFormats: {
@@ -57,23 +52,11 @@ export class WindChart {
 
   constructor(private windChartDataService: WindChartDataService) {
 
-    this.windChartDataService.getData().subscribe(data => {
+    this.windChartDataService.getData(this.hoursBack).subscribe(data => {
        console.log('retrieved data:', JSON.stringify(data));
        this.retrievedData = data;
 
-       this.windChartData = {
-          datasets: [
-            {
-              label: 'Wind Speed (knots)',
-              data: this.getWindSpeedData(this.retrievedData),
-              fill: false,
-              tension: 0.3,
-              borderColor: '#1976d2',
-              backgroundColor: 'rgba(25, 118, 210, 0.2)',
-              pointBackgroundColor: '#1976d2'
-            }
-          ]
-        };
+       this.windChartData = this.getChartDataSet(this.hoursBack);
     });
   }
 
@@ -89,14 +72,33 @@ export class WindChart {
     this.chart?.update(); // Trigger chart update
   }
 
-  getWindSpeedData(data: WeatherData[]) {
+  getWindSpeedData(data: WeatherData[], hoursBack: number) {
 
-    let da = data.map(entry => ({
+    let hoursBackDateTime = Date.now() - hoursBack * 3600 * 1000;
+    let da = data
+      .map(entry => ({
       x: entry.Wn * 1000, // Unix timestamp in milliseconds
       y: entry.Wd  // Wind direction in degrees
-    }));
-    console.log("Converted" + da.length + " data points for wind chart.");
-    console.log(JSON.stringify(da));
+    }))
+      .filter(point => point.x >= hoursBackDateTime);
+    //console.log("Converted" + da.length + " data points for wind chart.");
+    //console.log(JSON.stringify(da));
     return da;
+  }
+
+  getChartDataSet(hoursBack: number): ChartConfiguration<'line'>['data'] {
+    return {
+      datasets: [
+        {
+          label: 'Wind Speed (knots)',
+          data: this.getWindSpeedData(this.retrievedData, hoursBack),
+          fill: false,
+          tension: 0.3,
+          borderColor: '#1976d2',
+          backgroundColor: 'rgba(25, 118, 210, 0.2)',
+          pointBackgroundColor: '#1976d2'
+        }
+      ]
+    };
   }
 }
