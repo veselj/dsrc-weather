@@ -43,6 +43,11 @@ resource "aws_s3_bucket_policy" "dsrc_weather_policy" {
   })
 }
 
+resource "random_pet" "always_copy" {
+  length    = 3
+}
+
+
 data "aws_caller_identity" "current" {}
 
 resource "null_resource" "sync_www_folder" {
@@ -51,6 +56,6 @@ resource "null_resource" "sync_www_folder" {
   }
 
   triggers = {
-    always_run = random_pet.always_run.id
+    always_run = random_pet.always_copy.id
   }
 }
