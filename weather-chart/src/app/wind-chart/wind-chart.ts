@@ -3,6 +3,7 @@ import {BaseChartDirective} from 'ng2-charts';
 import {ChartConfiguration, TimeScaleOptions} from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import {WeatherData, WindChartDataService} from '../services/wind-chart-data-service';
+import {SampleCalculation} from '../calculations/sample-calculations';
 
 type GranularityType = 'minute' | 'hour';
 
@@ -17,46 +18,100 @@ export class WindChart {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective; // Declare chart property
 
   public granularity: 'minute' | 'hour' = 'hour'; // Granularity control
-  public hoursBack: number = 6; // Hours back for data retrieval
+  private hoursBackRetrival  = 6; // Hours back for data retrieval
+  public hoursBack: number = 1; // Hours back for display
   public windChartData: ChartConfiguration<'line'>['data'] = {
     datasets: []
   };
   public windChartType: 'line' = 'line';
-  private retrievedData: WeatherData[] = [];
+ private calc?: SampleCalculation;
 
   public windChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     plugins: {
-      legend: { display: true },
+      legend: {
+        display: true,
+        position: 'top', // Move legend to the top
+        labels: {
+          font: {
+            size: 14,
+            family: 'Arial, sans-serif'
+          },
+          color: '#333'
+        }
+      },
       title: {
         display: true,
-        text: 'Wind Speed (knots) Over Time'
+        text: 'Wind Speed (knots) Over Time',
+        font: {
+          size: 18,
+          family: 'Arial, sans-serif'
+        },
+        color: '#444'
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        titleFont: { size: 14 },
+        bodyFont: { size: 12 },
+        cornerRadius: 4
       }
     },
     scales: {
       y: {
         beginAtZero: true,
-        title: { display: true, text: 'Speed (knots)' }
+        title: {
+          display: true,
+          text: 'Speed (knots)',
+          font: {
+            size: 14,
+            family: 'Arial, sans-serif'
+          },
+          color: '#555'
+        },
+        grid: {
+          color: 'rgba(200, 200, 200, 0.3)'
+        }
       },
       x: {
         type: 'time',
         time: {
-          unit: this.granularity, // Dynamically set granularity
+          unit: this.granularity,
           displayFormats: {
             minute: 'HH:mm',
             hour: 'HH:mm'
           }
         },
-        title: { display: true, text: 'Time' }
+        title: {
+          display: true,
+          text: 'Time',
+          font: {
+            size: 14,
+            family: 'Arial, sans-serif'
+          },
+          color: '#555'
+        },
+        grid: {
+          color: 'rgba(200, 200, 200, 0.3)'
+        }
+      }
+    },
+    elements: {
+      line: {
+        borderWidth: 2, // Thinner lines
+        tension: 0.4 // Smooth curves
+      },
+      point: {
+        radius: 4, // Larger points
+        hoverRadius: 6
       }
     }
   };
 
   constructor(private windChartDataService: WindChartDataService) {
 
-    this.windChartDataService.getData(this.hoursBack).subscribe(data => {
+    this.windChartDataService.getData(this.hoursBackRetrival).subscribe(data => {
        console.log('retrieved data:', JSON.stringify(data));
-       this.retrievedData = data;
+       this.calc = new SampleCalculation(data);
 
        this.windChartData = this.getChartDataSet(this.hoursBack);
     });
@@ -85,23 +140,13 @@ export class WindChart {
     this.chart?.update(); // Trigger chart update
   }
 
-  getWindSpeedData(data: WeatherData[], hoursBack: number) {
-
-    let hoursBackDateTime = Date.now() - hoursBack * 3600 * 1000;
-    let da = data
-      .map(entry => ({
-      x: entry.Wn * 1000, // Unix timestamp in milliseconds
-      y: entry.Wd  // Wind direction in degrees
-    }))
-      .filter(point => point.x >= hoursBackDateTime);
-    //console.log("Converted" + da.length + " data points for wind chart.");
-    //console.log(JSON.stringify(da));
-    return da;
-  }
-
   getChartDataSet(hoursBack: number): ChartConfiguration<'line'>['data'] {
 
-    const samples = this.getWindSpeedData(this.retrievedData, hoursBack);
+    if (!this.calc) {
+      return { datasets: [] };
+    }
+
+    const samples = this.calc.getWindSpeedData(hoursBack);
     const count = samples.length;
     const averageWindSpeed = samples
       .reduce((sum, point) => sum + point.y, 0) / count;
