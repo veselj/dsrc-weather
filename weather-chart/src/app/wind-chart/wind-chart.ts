@@ -147,9 +147,12 @@ export class WindChart {
     }
 
     const samples = this.calc.getWindSpeedData(hoursBack);
-    const count = samples.length;
-    const averageWindSpeed = samples
-      .reduce((sum, point) => sum + point.y, 0) / count;
+    //const averageWindSpeed = this.calc.getAverageWindSpeed(hoursBack);
+    if (samples.length == 0) {
+      return { datasets: [] };
+    }
+    const fromSecs = Math.floor(samples[0].x / 1000);
+    const movingAverages = this.calc.getMovingAverages(fromSecs);
 
     return {
       datasets: [
@@ -163,8 +166,8 @@ export class WindChart {
           pointBackgroundColor: '#1976d2'
         },
         {
-          label: 'Average Wind Speed (knots)',
-          data: samples.map(point => ({ x: point.x, y: averageWindSpeed })),
+          label: 'Moving Average Wind Speed (knots), window 10min',
+          data: movingAverages,
           fill: false,
           borderDash: [5, 5],
           borderColor: '#ff5722',
