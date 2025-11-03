@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, ViewChild, HostListener, OnDestroy, OnInit} from '@angular/core';
 import {BaseChartDirective} from 'ng2-charts';
 import {ChartConfiguration, TimeScaleOptions} from 'chart.js';
 import 'chartjs-adapter-date-fns';
@@ -14,7 +14,7 @@ type GranularityType = 'minute' | 'hour';
   templateUrl: './wind-chart.html',
   styleUrl: './wind-chart.css'
 })
-export class WindChart {
+export class WindChart implements OnInit, OnDestroy {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective; // Declare chart property
 
   public granularity: 'minute' | 'hour' = 'hour'; // Granularity control
@@ -23,12 +23,14 @@ export class WindChart {
   public windChartData: ChartConfiguration<'line'>['data'] = {
     datasets: []
   };
+  private resizeListener: () => void;
   public windChartType: 'line' = 'line';
  private calc?: SampleCalculation;
  private subtitle: string = '';
 
  public windChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
+   maintainAspectRatio: false,
     plugins: {
       legend: {
         display: true,
@@ -43,7 +45,7 @@ export class WindChart {
       },
       title: {
         display: true,
-        text: 'Wind Speed (knots) Over Time',
+        text: 'Wind Speed Over Time (knots)',
         font: {
           size: 18,
           family: 'Arial, sans-serif'
@@ -71,7 +73,7 @@ export class WindChart {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Speed (knots)',
+          text: 'Wind Speed (knots)',
           font: {
             size: 14,
             family: 'Arial, sans-serif'
@@ -125,6 +127,21 @@ export class WindChart {
 
        this.windChartData = this.getChartDataSet(this.hoursBack);
     });
+    this.resizeListener = () => { };
+  }
+
+  ngOnInit(): void {
+    this.resizeListener = this.onResize.bind(this);
+    window.addEventListener('resize', this.resizeListener);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', this.resizeListener);
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.chart?.update(); // Trigger chart update on resize
   }
 
   // // Method to toggle granularity
@@ -168,7 +185,7 @@ export class WindChart {
     return {
       datasets: [
         {
-          label: 'Wind Speed (knots)',
+          label: 'Wind Speed (every minute)',
           data: samples,
           fill: false,
           tension: 0.3,
