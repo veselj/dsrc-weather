@@ -167,8 +167,9 @@ export class TempChart implements OnInit, OnDestroy {
     }
     const overallStats = this.calc.getOverallStats(samples);
     const feelsLikeSamples = this.calc.getFeelsLikeTemperatureData(hoursBack);
+    const feelsLikeStats = this.calc.getOverallStats(feelsLikeSamples);
 
-    this.setSubtitle(overallStats);
+    this.setSubtitle(overallStats, feelsLikeStats);
 
     return {
       datasets: [
@@ -194,9 +195,10 @@ export class TempChart implements OnInit, OnDestroy {
     };
   }
 
-  setSubtitle(stats: OverallStats): void {
+  setSubtitle(stats: OverallStats, feelsLike: OverallStats): void {
     if (this.tempChartOptions?.plugins?.subtitle) {
-      this.tempChartOptions.plugins.subtitle.text = `Min: ${stats.min.toFixed(2)}, Max: ${stats.max.toFixed(2)}, Avg: ${stats.average.toFixed(2)}`;
+      this.tempChartOptions.plugins.subtitle.text = [`Temperature Min: ${stats.min.toFixed(2)}, Max: ${stats.max.toFixed(2)}, Avg: ${stats.average.toFixed(2)}`,
+      `Feels Like Min: ${feelsLike.min.toFixed(2)}, Max: ${feelsLike.max.toFixed(2)}, Avg: ${feelsLike.average.toFixed(2)}`];
     }
   }
 

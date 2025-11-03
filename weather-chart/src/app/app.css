@@ -1,16 +1,16 @@
 .chart-toggle-container {
   display: flex;
   justify-content: center;
-  margin: 20px 0;
-  gap: 15px;
+  margin: 10px 0;
+  gap: 10px;
 }
 
 .chart-toggle-container label {
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-size: 16px;
-  color: #555;
+  font-size: 14px;
+  color: #444;
 }
 
 .chart-toggle-container input[type="radio"] {
@@ -18,14 +18,25 @@
 }
 
 .chart-toggle-container input[type="radio"] + span {
-  padding: 10px 20px;
-  border: 2px solid #1976d2;
-  border-radius: 20px;
-  background-color: #f0f0f0;
-  transition: background-color 0.3s, color 0.3s;
+  padding: 6px 12px;
+  border: 1px solid #1976d2;
+  border-radius: 15px;
+  background-color: #f9f9f9;
+  transition: background-color 0.2s, color 0.2s;
+  font-size: 14px;
 }
 
 .chart-toggle-container input[type="radio"]:checked + span {
   background-color: #1976d2;
+  color: #fff;
+}
+
+.chart-toggle-container input[type="radio"][value="temp"] + span {
+  border-color: #d32f2f; /* Red border */
+  background-color: #fdecea; /* Light red background */
+}
+
+.chart-toggle-container input[type="radio"][value="temp"]:checked + span {
+  background-color: #d32f2f; /* Darker red background when selected */
   color: #fff;
 }
