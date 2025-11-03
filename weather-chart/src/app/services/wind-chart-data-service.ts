@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 
 
 export type WeatherData = {
@@ -17,16 +17,20 @@ export type WeatherData = {
 })
 export class WindChartDataService {
   private apiUrl = 'https://4w4vljd7q24rgeo7c42afyzpze0xqmhx.lambda-url.eu-west-1.on.aws';
+  private cachedData?: Observable<WeatherData[]>;
 
   constructor(private http: HttpClient) {}
 
   getData(hourSpan?: number): Observable<WeatherData[]> {
-   let url: string;
-    if (hourSpan) {
-      url = `${this.apiUrl}?hours=${hourSpan}`;
-    } else {
-      url = this.apiUrl;
+    if (!this.cachedData) {
+      let url: string;
+      if (hourSpan) {
+        url = `${this.apiUrl}?hours=${hourSpan}`;
+      } else {
+        url = this.apiUrl;
+      }
+    this.cachedData = this.http.get<WeatherData[]>(url).pipe(shareReplay(1));
     }
-    return this.http.get<WeatherData[]>(url);
+    return this.cachedData
   }
 }

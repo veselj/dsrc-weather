@@ -74,7 +74,7 @@ export class TempChart implements OnInit, OnDestroy {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Temperatur (°C)',
+          text: 'Temperature (°C)',
           font: {
             size: 14,
             family: 'Arial, sans-serif'
