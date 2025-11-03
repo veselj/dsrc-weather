@@ -1,0 +1,22 @@
+<h2>Weather at Grassy Beach</h2>
+<div>
+  @for (option of historyOptions; track option) {
+    <button [class.active]="hoursBack === option" (click)="setHistory(option)">
+      {{ option === 0.5 ? '30 Minutes' : option + ' Hour' + (option > 1 ? 's' : '') }}</button>
+  }
+</div>
+@if(loading) {
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading data ...</p>
+  </div>
+} @else {
+  <div style="display: block;" class="chart-container">
+  <canvas baseChart
+  [data]="tempChartData"
+  [type]="tempChartType"
+  [options]="tempChartOptions">
+  </canvas>
+  </div>
+}
+

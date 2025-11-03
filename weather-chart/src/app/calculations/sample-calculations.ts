@@ -18,6 +18,24 @@ export class SampleCalculation {
         }));
     }
 
+  public getTemperatureData(hoursBack: number): GraphDataPoint[] {
+    const sampleSet = this.filterDataByHoursBack(hoursBack);
+    return sampleSet
+      .map(entry => ({
+        x: entry.Wn * 1000, // Unix timestamp in milliseconds
+        y: entry.Te  // Temperature in °C
+      }));
+  }
+
+  public getFeelsLikeTemperatureData(hoursBack: number): GraphDataPoint[] {
+    const sampleSet = this.filterDataByHoursBack(hoursBack);
+    return sampleSet
+      .map(entry => ({
+        x: entry.Wn * 1000, // Unix timestamp in milliseconds
+        y: entry.Fl  // Temperature in °C
+      }));
+  }
+
     public getOverallStats(sampleSet :GraphDataPoint[]): OverallStats {
       let sum = 0;
       let min = Number.POSITIVE_INFINITY;

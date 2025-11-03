@@ -8,28 +8,28 @@ import {OverallStats, SampleCalculation} from '../calculations/sample-calculatio
 type GranularityType = 'minute' | 'hour';
 
 @Component({
-  selector: 'app-wind-chart',
+  selector: 'app-temp-chart',
   standalone: true,
   imports: [BaseChartDirective],
-  templateUrl: './wind-chart.html',
-  styleUrl: './wind-chart.css'
+  templateUrl: './temp-chart.html',
+  styleUrl: './temp-chart.css'
 })
-export class WindChart implements OnInit, OnDestroy {
+export class TempChart implements OnInit, OnDestroy {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective; // Declare chart property
 
   loading = true;
   public granularity: 'minute' | 'hour' = 'hour'; // Granularity control
   private hoursBackRetrieval  = 6; // Hours back for data retrieval
   public hoursBack: number = 1; // Hours back for display
-  public windChartData: ChartConfiguration<'line'>['data'] = {
+  public tempChartData: ChartConfiguration<'line'>['data'] = {
     datasets: []
   };
   private resizeListener: () => void;
-  public windChartType: 'line' = 'line';
- private calc?: SampleCalculation;
- private subtitle: string = '';
+  public tempChartType: 'line' = 'line';
+  private calc?: SampleCalculation;
+  private subtitle: string = '';
 
- public windChartOptions: ChartConfiguration<'line'>['options'] = {
+ public tempChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
    maintainAspectRatio: false,
     plugins: {
@@ -46,7 +46,7 @@ export class WindChart implements OnInit, OnDestroy {
       },
       title: {
         display: true,
-        text: 'Wind Speed Over Time (knots)',
+        text: 'Temperature Over Time (°C)',
         font: {
           size: 18,
           family: 'Arial, sans-serif'
@@ -74,7 +74,7 @@ export class WindChart implements OnInit, OnDestroy {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Wind Speed (knots)',
+          text: 'Temperatur (°C)',
           font: {
             size: 14,
             family: 'Arial, sans-serif'
@@ -125,7 +125,7 @@ export class WindChart implements OnInit, OnDestroy {
     this.windChartDataService.getData(this.hoursBackRetrieval).subscribe(data => {
        this.loading = false;
        this.calc = new SampleCalculation(data);
-       this.windChartData = this.getChartDataSet(this.hoursBack);
+       this.tempChartData = this.getChartDataSet(this.hoursBack);
     });
     this.resizeListener = () => { };
   }
@@ -146,12 +146,12 @@ export class WindChart implements OnInit, OnDestroy {
 
   setGranularity(granularity :GranularityType): void {
     this.granularity = granularity
-    const xScale = this.windChartOptions?.scales?.['x'] as TimeScaleOptions;
+    const xScale = this.tempChartOptions?.scales?.['x'] as TimeScaleOptions;
     if (xScale?.time) {
       xScale.time.unit = this.granularity;
     }
     // Reassign the options object to trigger Angular change detection
-    this.windChartOptions = { ...this.windChartOptions };
+    this.tempChartOptions = { ...this.tempChartOptions };
     this.chart?.update(); // Trigger chart update
   }
 
@@ -161,19 +161,19 @@ export class WindChart implements OnInit, OnDestroy {
       return { datasets: [] };
     }
 
-    const samples = this.calc.getWindSpeedData(hoursBack);
+    const samples = this.calc.getTemperatureData(hoursBack);
     if (samples.length == 0) {
       return { datasets: [] };
     }
     const overallStats = this.calc.getOverallStats(samples);
-    const movingAverages = this.calc.getMovingAverages(samples);
+    const feelsLikeSamples = this.calc.getFeelsLikeTemperatureData(hoursBack);
 
     this.setSubtitle(overallStats);
 
     return {
       datasets: [
         {
-          label: 'Wind Speed (every minute)',
+          label: 'Temperature (°C)',
           data: samples,
           fill: false,
           tension: 0.3,
@@ -182,8 +182,8 @@ export class WindChart implements OnInit, OnDestroy {
           pointBackgroundColor: '#1976d2'
         },
         {
-          label: 'Moving Average (last 10 minutes)',
-          data: movingAverages,
+          label: 'Feels like (°C)',
+          data: feelsLikeSamples,
           fill: false,
           borderDash: [5, 5],
           borderColor: '#054702',
@@ -195,14 +195,14 @@ export class WindChart implements OnInit, OnDestroy {
   }
 
   setSubtitle(stats: OverallStats): void {
-    if (this.windChartOptions?.plugins?.subtitle) {
-      this.windChartOptions.plugins.subtitle.text = `Min: ${stats.min.toFixed(2)}, Max: ${stats.max.toFixed(2)}, Avg: ${stats.average.toFixed(2)}`;
+    if (this.tempChartOptions?.plugins?.subtitle) {
+      this.tempChartOptions.plugins.subtitle.text = `Min: ${stats.min.toFixed(2)}, Max: ${stats.max.toFixed(2)}, Avg: ${stats.average.toFixed(2)}`;
     }
   }
 
   setHistory(hours: number): void {
     this.hoursBack = hours;
-    this.windChartData = this.getChartDataSet(this.hoursBack);
+    this.tempChartData = this.getChartDataSet(this.hoursBack);
     let granularity: GranularityType = hours <= 1 ? 'minute' : 'hour';
     this.setGranularity(granularity);
     this.chart?.update(); // Trigger chart update
