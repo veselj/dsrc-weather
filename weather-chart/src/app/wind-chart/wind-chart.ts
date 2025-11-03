@@ -177,7 +177,7 @@ export class WindChart {
           pointBackgroundColor: '#1976d2'
         },
         {
-          label: 'Moving Average Wind Speed (knots), window 10min',
+          label: 'Moving Average (last 10 minutes)',
           data: movingAverages,
           fill: false,
           borderDash: [5, 5],
