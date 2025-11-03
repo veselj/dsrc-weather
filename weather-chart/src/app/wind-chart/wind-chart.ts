@@ -191,7 +191,7 @@ export class WindChart {
 
   setSubtitle(stats: OverallStats): void {
     if (this.windChartOptions?.plugins?.subtitle) {
-      this.windChartOptions.plugins.subtitle.text = `Min: ${stats.min.toFixed(2)} knots, Max: ${stats.max.toFixed(2)} knots, Avg: ${stats.average.toFixed(2)} knots`;
+      this.windChartOptions.plugins.subtitle.text = `Min: ${stats.min.toFixed(2)}, Max: ${stats.max.toFixed(2)}, Avg: ${stats.average.toFixed(2)}`;
     }
   }
 
