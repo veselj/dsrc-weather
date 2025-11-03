@@ -5,7 +5,7 @@
       {{ option === 0.5 ? '30 Minutes' : option + ' Hour' + (option > 1 ? 's' : '') }}</button>
   }
 </div>
-<div style="display: block;">
+<div style="display: block;" class="chart-container">
     <canvas baseChart
             [data]="windChartData"
             [type]="windChartType"
