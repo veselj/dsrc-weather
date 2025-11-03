@@ -82,7 +82,7 @@ export class WindChart implements OnInit, OnDestroy {
           color: '#555'
         },
         grid: {
-          color: 'rgba(200, 200, 200, 0.3)'
+          color: 'rgba(201,201,201,0.3)'
         }
       },
       x: {
@@ -198,9 +198,9 @@ export class WindChart implements OnInit, OnDestroy {
           data: movingAverages,
           fill: false,
           borderDash: [5, 5],
-          borderColor: '#ff5722',
-          backgroundColor: 'rgba(255, 87, 34, 0.2)',
-          pointBackgroundColor: '#ff5722'
+          borderColor: '#054702',
+          backgroundColor: 'rgba(207,148,129,0.2)',
+          pointBackgroundColor: '#2f8817'
         }
       ]
     };
