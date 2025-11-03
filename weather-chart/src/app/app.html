@@ -1,3 +1,16 @@
-<app-weather-station></app-weather-station>
-<app-wind-chart></app-wind-chart>
-<app-temp-chart></app-temp-chart>
+<div class="chart-toggle-container">
+  <label>
+    <input type="radio" name="chartToggle" [(ngModel)]="selectedChart" value="wind" />
+    <span>Wind Chart</span>
+  </label>
+  <label>
+    <input type="radio" name="chartToggle" [(ngModel)]="selectedChart" value="temp" />
+    <span>Temp Chart</span>
+  </label>
+</div>
+
+@if(selectedChart === 'wind') {
+  <app-wind-chart></app-wind-chart>
+} @else {
+  <app-temp-chart></app-temp-chart>
+}
