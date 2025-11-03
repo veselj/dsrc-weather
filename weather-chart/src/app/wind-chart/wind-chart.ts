@@ -3,7 +3,7 @@ import {BaseChartDirective} from 'ng2-charts';
 import {ChartConfiguration, TimeScaleOptions} from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import {WeatherData, WindChartDataService} from '../services/wind-chart-data-service';
-import {SampleCalculation} from '../calculations/sample-calculations';
+import {OverallStats, SampleCalculation} from '../calculations/sample-calculations';
 
 type GranularityType = 'minute' | 'hour';
 
@@ -25,8 +25,9 @@ export class WindChart {
   };
   public windChartType: 'line' = 'line';
  private calc?: SampleCalculation;
+ private subtitle: string = '';
 
-  public windChartOptions: ChartConfiguration<'line'>['options'] = {
+ public windChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     plugins: {
       legend: {
@@ -48,6 +49,15 @@ export class WindChart {
           family: 'Arial, sans-serif'
         },
         color: '#444'
+      },
+      subtitle: {
+        display: true,
+        text: '',
+        font: {
+          size: 14,
+          family: 'Arial, sans-serif'
+        },
+        color: '#666'
       },
       tooltip: {
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
@@ -117,17 +127,17 @@ export class WindChart {
     });
   }
 
-  // Method to toggle granularity
-  toggleGranularity(): void {
-    this.granularity = this.granularity === 'minute' ? 'hour' : 'minute';
-    const xScale = this.windChartOptions?.scales?.['x'] as TimeScaleOptions;
-    if (xScale?.time) {
-      xScale.time.unit = this.granularity;
-    }
-    // Reassign the options object to trigger Angular change detection
-    this.windChartOptions = { ...this.windChartOptions };
-    this.chart?.update(); // Trigger chart update
-  }
+  // // Method to toggle granularity
+  // toggleGranularity(): void {
+  //   this.granularity = this.granularity === 'minute' ? 'hour' : 'minute';
+  //   const xScale = this.windChartOptions?.scales?.['x'] as TimeScaleOptions;
+  //   if (xScale?.time) {
+  //     xScale.time.unit = this.granularity;
+  //   }
+  //   // Reassign the options object to trigger Angular change detection
+  //   this.windChartOptions = { ...this.windChartOptions };
+  //   this.chart?.update(); // Trigger chart update
+  // }
 
   setGranularity(granularity :GranularityType): void {
     this.granularity = granularity
@@ -147,12 +157,13 @@ export class WindChart {
     }
 
     const samples = this.calc.getWindSpeedData(hoursBack);
-    //const averageWindSpeed = this.calc.getAverageWindSpeed(hoursBack);
     if (samples.length == 0) {
       return { datasets: [] };
     }
-    const fromSecs = Math.floor(samples[0].x / 1000);
-    const movingAverages = this.calc.getMovingAverages(fromSecs);
+    const overallStats = this.calc.getOverallStats(samples);
+    const movingAverages = this.calc.getMovingAverages(samples);
+
+    this.setSubtitle(overallStats);
 
     return {
       datasets: [
@@ -176,6 +187,12 @@ export class WindChart {
         }
       ]
     };
+  }
+
+  setSubtitle(stats: OverallStats): void {
+    if (this.windChartOptions?.plugins?.subtitle) {
+      this.windChartOptions.plugins.subtitle.text = `Min: ${stats.min.toFixed(2)} knots, Max: ${stats.max.toFixed(2)} knots, Avg: ${stats.average.toFixed(2)} knots`;
+    }
   }
 
   setHistory(hours: number): void {
