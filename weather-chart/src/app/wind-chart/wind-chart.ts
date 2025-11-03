@@ -17,6 +17,7 @@ type GranularityType = 'minute' | 'hour';
 export class WindChart implements OnInit, OnDestroy {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective; // Declare chart property
 
+  loading = true;
   public granularity: 'minute' | 'hour' = 'hour'; // Granularity control
   private hoursBackRetrival  = 6; // Hours back for data retrieval
   public hoursBack: number = 1; // Hours back for display
@@ -122,9 +123,8 @@ export class WindChart implements OnInit, OnDestroy {
   constructor(private windChartDataService: WindChartDataService) {
 
     this.windChartDataService.getData(this.hoursBackRetrival).subscribe(data => {
-       console.log('retrieved data:', JSON.stringify(data));
+       this.loading = false;
        this.calc = new SampleCalculation(data);
-
        this.windChartData = this.getChartDataSet(this.hoursBack);
     });
     this.resizeListener = () => { };
