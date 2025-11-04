@@ -1,4 +1,5 @@
 <h2>Wind at Grassy Beach</h2>
+<div>{{getSampleTimestamp() | date:'EEEE, MMMM d, y, h:mm:ss a'}}</div>
 <div>
   @for (option of historyOptions; track option) {
     <button [class.active]="hoursBack === option" (click)="setHistory(option)">

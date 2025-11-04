@@ -9,6 +9,13 @@ export class SampleCalculation {
   constructor(private weatherData: WeatherData[]) {
   }
 
+  public getSampleDate() : Date {
+    if (this.weatherData.length === 0) {
+      return new Date(0); // Return epoch if no data
+    }
+    const lastEntry = this.weatherData[this.weatherData.length - 1];
+    return new Date(lastEntry.Wn * 1000); // Convert Unix timestamp to milliseconds
+  }
   public getWindSpeedData(hoursBack: number): GraphDataPoint[] {
     const sampleSet = this.filterDataByHoursBack(hoursBack);
     return sampleSet
@@ -67,9 +74,14 @@ export class SampleCalculation {
   }
 
   private filterDataByHoursBack(hoursBack: number): WeatherData[] {
-    const hoursBackDateTimeSecs = Math.floor(Date.now()/1000) - (hoursBack * 3600);
+    // Better basing in on last sample time than current time
+    //const hoursBackDateTimeSecs = Math.floor(Date.now()/1000) - (hoursBack * 3600);
+    const lastEntrySecs = this.weatherData[this.weatherData.length - 1].Wn;
+    const hoursBackDateTimeSecs = lastEntrySecs - (hoursBack * 3600);
     return this.weatherData.filter(entry => entry.Wn >= hoursBackDateTimeSecs);
   }
+
+
 
   private localAverageSpeed(sampleSet: GraphDataPoint[], from:number, to:number):number{
     let sum = 0;

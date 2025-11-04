@@ -1,4 +1,5 @@
 import {Component, ViewChild, HostListener, OnDestroy, OnInit} from '@angular/core';
+import { DatePipe } from '@angular/common';
 import {BaseChartDirective} from 'ng2-charts';
 import {ChartConfiguration, TimeScaleOptions} from 'chart.js';
 import 'chartjs-adapter-date-fns';
@@ -10,7 +11,7 @@ type GranularityType = 'minute' | 'hour';
 @Component({
   selector: 'app-wind-chart',
   standalone: true,
-  imports: [BaseChartDirective],
+  imports: [BaseChartDirective, DatePipe],
   templateUrl: './wind-chart.html',
   styleUrl: './wind-chart.css'
 })
@@ -209,5 +210,12 @@ export class WindChart implements OnInit, OnDestroy {
   }
 
   public historyOptions: number[] = [0.5, 1, 3, 6]; // Options for history
+
+  public getSampleTimestamp(): Date {
+    if (!this.calc) {
+      return new Date(0);
+    }
+    return this.calc.getSampleDate();
+  }
 
 }
