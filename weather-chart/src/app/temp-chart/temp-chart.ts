@@ -181,7 +181,9 @@ export class TempChart implements OnInit, OnDestroy {
           tension: 0.3,
           borderColor: '#1976d2',
           backgroundColor: 'rgba(25, 118, 210, 0.2)',
-          pointBackgroundColor: '#1976d2'
+          pointBackgroundColor: '#1976d2',
+          pointRadius: 0,
+          pointHoverRadius: 0
         },
         {
           label: 'Feels like (°C)',
@@ -190,7 +192,9 @@ export class TempChart implements OnInit, OnDestroy {
           borderDash: [5, 5],
           borderColor: '#054702',
           backgroundColor: 'rgba(207,148,129,0.2)',
-          pointBackgroundColor: '#2f8817'
+          pointBackgroundColor: '#2f8817',
+          pointRadius: 0,
+          pointHoverRadius: 0
         }
       ]
     };

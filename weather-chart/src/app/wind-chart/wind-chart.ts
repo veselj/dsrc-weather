@@ -171,6 +171,13 @@ export class WindChart implements OnInit, OnDestroy {
 
     this.setSubtitle(overallStats);
 
+    let pointRadius = 3
+    let pointHoverRadius = 3
+    if (hoursBack > 1) {
+      pointRadius = 0
+      pointHoverRadius = 0
+    }
+
     return {
       datasets: [
         {
@@ -180,7 +187,9 @@ export class WindChart implements OnInit, OnDestroy {
           tension: 0.3,
           borderColor: '#1976d2',
           backgroundColor: 'rgba(25, 118, 210, 0.2)',
-          pointBackgroundColor: '#1976d2'
+          pointBackgroundColor: '#1976d2',
+          pointRadius: pointRadius,
+          pointHoverRadius: pointHoverRadius
         },
         {
           label: 'Moving Average (last 10 minutes)',
@@ -189,7 +198,9 @@ export class WindChart implements OnInit, OnDestroy {
           borderDash: [5, 5],
           borderColor: '#054702',
           backgroundColor: 'rgba(207,148,129,0.2)',
-          pointBackgroundColor: '#2f8817'
+          pointBackgroundColor: '#2f8817',
+          pointRadius: pointRadius,
+          pointHoverRadius: pointHoverRadius
         }
       ]
     };

@@ -12,15 +12,18 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/veselj/dsrc-weather/internal/record"
+	"github.com/veselj/dsrc-weather/weather-collector/weather/tides"
 )
 
 const (
 	SamplesTable = "WeatherSamples"
+	TidesTable   = "TideTimes"
 )
 
 type DynamoClient struct {
-	client    *dynamodb.Client
-	tableName string
+	client          *dynamodb.Client
+	sampleTableName string
+	tidesTableName  string
 }
 
 func NewDynamoClient() *DynamoClient {
@@ -31,8 +34,9 @@ func NewDynamoClient() *DynamoClient {
 	}
 
 	return &DynamoClient{
-		client:    dynamodb.NewFromConfig(cfg),
-		tableName: SamplesTable,
+		client:          dynamodb.NewFromConfig(cfg),
+		sampleTableName: SamplesTable,
+		tidesTableName:  TidesTable,
 	}
 }
 
@@ -59,20 +63,95 @@ func (c *DynamoClient) PutSample(ctx context.Context, s *record.Sample) error {
 	}
 
 	_, err = c.client.PutItem(ctx, &dynamodb.PutItemInput{
-		TableName: aws.String(c.tableName),
+		TableName: aws.String(c.sampleTableName),
 		Item:      item,
 	})
 	return err
 }
 
-func Save(sample *record.Sample) error {
-	dynamo := NewDynamoClient()
-	err := dynamo.PutSample(context.Background(), sample)
+func (c *DynamoClient) PutTides(ctx context.Context, tides []tides.Tide) error {
+	t, err := c.GetTides(ctx)
+	if err == nil && len(t) > 0 {
+		return nil
+	}
+
+	for _, tide := range tides {
+		item, err := attributevalue.MarshalMap(struct {
+			Type      int     `dynamodbav:"Type"`
+			When      int64   `dynamodbav:"When"`
+			Height    float64 `dynamodbav:"Height"`
+			ExpiresAt int64   `dynamodbav:"expires_at"`
+		}{
+			Type:      tide.Type,
+			When:      tide.Time.Unix(),
+			Height:    tide.Height,
+			ExpiresAt: time.Now().Add(time.Hour * 24 * 14).Unix(), // 14 days expiration
+		})
+		if err != nil {
+			return err
+		}
+
+		_, err = c.client.PutItem(ctx, &dynamodb.PutItemInput{
+			TableName: aws.String(c.tidesTableName),
+			Item:      item,
+		})
+	}
+	return nil
+}
+
+func (c *DynamoClient) GetTides(ctx context.Context) ([]tides.Tide, error) {
+	loc, err := time.LoadLocation("Europe/London")
+	if err != nil {
+		loc = time.UTC
+	}
+	now := time.Now().In(loc)
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
+	endOfDay := startOfDay.Add(24 * time.Hour)
+
+	keyCond := "#When BETWEEN :start AND :end"
+	exprAttrNames := map[string]string{
+		"#When": "When",
+	}
+	exprAttrValues := map[string]types.AttributeValue{
+		":start": &types.AttributeValueMemberN{Value: strconv.FormatInt(startOfDay.Unix(), 10)},
+		":end":   &types.AttributeValueMemberN{Value: strconv.FormatInt(endOfDay.Unix()-1, 10)},
+	}
+
+	result, err := c.client.Query(ctx, &dynamodb.QueryInput{
+		TableName:                 aws.String(c.tidesTableName),
+		KeyConditionExpression:    aws.String(keyCond),
+		ExpressionAttributeNames:  exprAttrNames,
+		ExpressionAttributeValues: exprAttrValues,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var tidesList []tides.Tide
+	err = attributevalue.UnmarshalListOfMaps(result.Items, &tidesList)
+	if err != nil {
+		return nil, err
+	}
+	return tidesList, nil
+}
+
+func (c *DynamoClient) SaveSample(sample *record.Sample) error {
+	err := c.PutSample(context.Background(), sample)
 	if err != nil {
 		log.Printf("failed to put sample, %+v", err)
 		return err
 	}
 	log.Printf("Saved sample: %+v", sample)
+	return nil
+}
+
+func (c *DynamoClient) SaveTides(tides []tides.Tide) error {
+	err := c.PutTides(context.Background(), tides)
+	if err != nil {
+		log.Printf("failed to put sample, %+v", err)
+		return err
+	}
+	log.Printf("Saved sample: %+v", tides)
 	return nil
 }
 
@@ -94,7 +173,7 @@ func (c *DynamoClient) Samples(ctx context.Context, fromUnix int64) []record.Sam
 
 	// Execute query
 	result, err := c.client.Query(context.TODO(), &dynamodb.QueryInput{
-		TableName:                 aws.String(c.tableName),
+		TableName:                 aws.String(c.sampleTableName),
 		KeyConditionExpression:    aws.String(keyCond),
 		ExpressionAttributeNames:  exprAttrNames,
 		ExpressionAttributeValues: exprAttrValues,
