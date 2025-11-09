@@ -38,19 +38,19 @@ resource "aws_dynamodb_table" "tide_times" {
   hash_key       = "When"
 
   attribute {
-    name = "Wn"
+    name = "When"
     type = "N"
   }
 
-  attribute {
-    name= "Type"
-    Type = "N"
-  }
-
-  attribute {
-    name= "Height"
-    Type = "N"
-  }
+  # attribute {
+  #   name= "Type"
+  #   type = "N"
+  # }
+  #
+  # attribute {
+  #   name= "Height"
+  #   type = "N"
+  # }
 
   ttl {
     attribute_name = "expires_at"

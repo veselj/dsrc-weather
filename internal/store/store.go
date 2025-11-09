@@ -72,18 +72,19 @@ func (c *DynamoClient) PutSample(ctx context.Context, s *record.Sample) error {
 func (c *DynamoClient) PutTides(ctx context.Context, tides []tides.Tide) error {
 	t, err := c.GetTides(ctx)
 	if err == nil && len(t) > 0 {
+		log.Printf("Tides already exist in the database, skipping insert")
 		return nil
 	}
 
 	for _, tide := range tides {
 		item, err := attributevalue.MarshalMap(struct {
-			Type      int     `dynamodbav:"Type"`
 			When      int64   `dynamodbav:"When"`
+			Type      int     `dynamodbav:"Type"`
 			Height    float64 `dynamodbav:"Height"`
 			ExpiresAt int64   `dynamodbav:"expires_at"`
 		}{
-			Type:      tide.Type,
 			When:      tide.Time.Unix(),
+			Type:      tide.Type,
 			Height:    tide.Height,
 			ExpiresAt: time.Now().Add(time.Hour * 24 * 14).Unix(), // 14 days expiration
 		})
@@ -95,6 +96,9 @@ func (c *DynamoClient) PutTides(ctx context.Context, tides []tides.Tide) error {
 			TableName: aws.String(c.tidesTableName),
 			Item:      item,
 		})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -130,6 +134,7 @@ func (c *DynamoClient) GetTides(ctx context.Context) ([]tides.Tide, error) {
 	var tidesList []tides.Tide
 	err = attributevalue.UnmarshalListOfMaps(result.Items, &tidesList)
 	if err != nil {
+		log.Printf("UnmarshalListOfMaps error: %v", err)
 		return nil, err
 	}
 	return tidesList, nil
@@ -151,7 +156,7 @@ func (c *DynamoClient) SaveTides(tides []tides.Tide) error {
 		log.Printf("failed to put sample, %+v", err)
 		return err
 	}
-	log.Printf("Saved sample: %+v", tides)
+	log.Printf("Saved tides: %+v", tides)
 	return nil
 }
 

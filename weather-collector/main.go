@@ -38,6 +38,7 @@ func handler(ctx context.Context, event Event) error {
 		log.Println("Error scraping tides", err)
 		return err
 	}
+	log.Printf("Tides: %+v\n", tides)
 	err = dynClient.SaveTides(tides)
 	if err != nil {
 		log.Println("Error saving tides", err)
