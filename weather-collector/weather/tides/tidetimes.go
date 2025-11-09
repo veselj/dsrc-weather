@@ -2,15 +2,22 @@ package tides
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
+const (
+	LowTide = iota
+	HighTide
+)
+
 type Tide struct {
-	Type   string
-	Time   string
-	Height string
+	Type   int
+	Time   time.Time
+	Height float64
 }
 
 func Scrape() ([]Tide, error) {
@@ -29,13 +36,19 @@ func Scrape() ([]Tide, error) {
 	doc.Find("table").EachWithBreak(func(_ int, table *goquery.Selection) bool {
 		header := table.Find("thead tr th").First().Text()
 		if strings.Contains(header, "Tide Times") {
-			table.Find("tr").Each(func(_ int, row *goquery.Selection) {
+			table.Find("tr").Each(func(i int, row *goquery.Selection) {
 				cells := row.Find("td")
 				if cells.Length() == 3 {
+					tideType := parseTideType(strings.TrimSpace(cells.Eq(0).Text()))
+					if tideType == -1 {
+						return
+					}
+					tideTime := parseTideTime(strings.TrimSpace(cells.Eq(1).Find("span").Text()))
+					height := parseTideHeight(strings.TrimSpace(cells.Eq(2).Text()))
 					tides = append(tides, Tide{
-						Type:   strings.TrimSpace(cells.Eq(0).Text()),
-						Time:   strings.TrimSpace(cells.Eq(1).Find("span").Text()),
-						Height: strings.TrimSpace(cells.Eq(2).Text()),
+						Type:   tideType,
+						Time:   tideTime,
+						Height: height,
 					})
 				}
 			})
@@ -45,4 +58,36 @@ func Scrape() ([]Tide, error) {
 	})
 
 	return tides, nil
+}
+
+func parseTideType(tideType string) int {
+	if strings.Contains(tideType, "High") {
+		return HighTide
+	} else if strings.Contains(tideType, "Low") {
+		return LowTide
+	}
+	return -1
+}
+
+func parseTideTime(tideTime string) time.Time {
+	loc, err := time.LoadLocation("Europe/London")
+	if err != nil {
+		loc = time.UTC
+	}
+	now := time.Now().In(loc)
+	parsed, err := time.ParseInLocation("15:04", tideTime, loc)
+	if err != nil {
+		return time.Time{}
+	}
+	// Combine today's date with parsed hour and minute
+	return time.Date(
+		now.Year(), now.Month(), now.Day(),
+		parsed.Hour(), parsed.Minute(), 0, 0, loc,
+	)
+}
+
+func parseTideHeight(tideHeight string) float64 {
+	heightStr := strings.TrimSuffix(tideHeight, "m")
+	height, _ := strconv.ParseFloat(strings.TrimSpace(heightStr), 64)
+	return height
 }
