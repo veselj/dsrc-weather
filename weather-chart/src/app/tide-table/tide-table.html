@@ -1,0 +1,26 @@
+<div>
+  @if(weatherData && weatherData.weather && weatherData.tides) {
+    <a href="https://www.tidetimes.org.uk/dundee-tide-times" target="_blank" rel="noopener noreferrer">
+      <h2>Dundee Tide Times</h2>
+    </a>
+    <table>
+      <thead>
+      <tr>
+        <th>Tide Type</th>
+        <th>Time</th>
+        <th>Height</th>
+        <th>Tide Change</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let tide of weatherData.tides; let i = index"
+          [ngClass]="{'highlight': i === getNextTideIndex()}">
+        <td>{{ tide.Type === 0 ? 'Low' : 'High' }}</td>
+        <td>{{ tide.Time * 1000 | date:'shortTime' | lowercase }}</td>
+        <td>{{ tide.Height | number:'1.2-2' }} m</td>
+        <td>{{ getTimeRemaining(tide.Time) }}</td>
+      </tr>
+      </tbody>
+    </table>
+  }
+</div>
