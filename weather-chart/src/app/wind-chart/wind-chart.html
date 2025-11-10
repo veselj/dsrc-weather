@@ -3,6 +3,7 @@
 <div>
   @for (option of historyOptions; track option) {
     <button [class.active]="hoursBack === option" (click)="setHistory(option)">
+      <i class="fa fa-clock"></i>
       {{ option === 0.5 ? '30 Minutes' : option + ' Hour' + (option > 1 ? 's' : '') }}</button>
   }
 </div>
