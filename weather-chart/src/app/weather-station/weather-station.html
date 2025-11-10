@@ -1,1 +1,76 @@
-<p>Weather Station Data</p>
+<div>
+  @if(weatherData && weatherData.weather && weatherData.tides) {
+    <h2>Grassy Beach Weather</h2>
+      <div><b>{{  currentTime() | date:'EEEE, MMMM d, y, HH:mm' }}</b></div>
+  <table>
+    <thead>
+    <tr>
+      <th>Measurement</th>
+      <th>Value</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>Temperature</td>
+      <td>{{ weatherData.weather.Temperature }}&deg;C</td>
+    </tr>
+    <tr>
+      <td>Feels Like</td>
+      <td>{{ weatherData.weather.FeelsLike }}&deg;C</td>
+    </tr>
+    <tr>
+      <td>Forecast</td>
+      <td>{{ weatherData.weather.Forecast }}</td>
+    </tr>
+    <tr>
+      <td>Wind Speed</td>
+      <td>{{ weatherData.weather.WindSpeed | number:'1.1-1' }} knots</td>
+    </tr>
+    <tr>
+      <td>Wind Direction</td>
+      <td>{{ weatherData.weather.WindDirectionName }}</td>
+    </tr>
+    <tr>
+      <td>Barometer</td>
+      <td>{{ weatherData.weather.Barometer }} {{ weatherData.weather.BarometerUnits }}</td>
+    </tr>
+    <tr>
+      <td>Rain</td>
+      <td>{{ weatherData.weather.Rain }} {{ weatherData.weather.RainUnits }}</td>
+    </tr>
+    <tr>
+      <td>Chance of Rain</td>
+      <td>{{ weatherData.weather.ChanceOfRain }}%</td>
+    </tr>
+    <tr>
+      <td>Humidity</td>
+      <td>{{ weatherData.weather.Humidity }}%</td>
+    </tr>
+
+    </tbody>
+  </table>
+    <a href="https://www.tidetimes.org.uk/dundee-tide-times" target="_blank" rel="noopener noreferrer">
+      <h2>Dundee Tide Times</h2>
+    </a>
+    <table>
+      <thead>
+      <tr>
+        <th>Tide Type</th>
+        <th>Time</th>
+        <th>Height</th>
+        <th>Tide Change</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let tide of weatherData.tides; let i = index"
+          [ngClass]="{'highlight': i === getNextTideIndex()}">
+        <td>{{ tide.Type === 0 ? 'Low' : 'High' }}</td>
+        <td>{{ tide.Time * 1000 | date:'shortTime' | lowercase }}</td>
+        <td>{{ tide.Height | number:'1.2-2' }} m</td>
+        <td>{{ getTimeRemaining(tide.Time) }}</td>
+      </tr>
+      </tbody>
+    </table>
+  }
+</div>
+<button (click)="goBack()">Back</button>

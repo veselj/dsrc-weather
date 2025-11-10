@@ -1,107 +1,49 @@
 import { Injectable } from '@angular/core';
-import {Observable} from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { Observable, shareReplay } from 'rxjs';
 
 
-const RTYC_WEATHER_LINK = "https://www.weatherlink.com/embeddablePage/getData/477837b179b94d58b123a4c127c40c50";
-
-// This worked as bulletin - but change ID automatically
-// https://www.weatherlink.com/bulletin/9722cfc3-a4ef-47b9-befb-72f52592d6ed
-
-
-// https://www.weatherlink.com/bulletin/64271a01-7451-40ac-b52e-e7ccf8b5b449
-
-
-export interface WeatherStationData {
-  windDirection: any
-  forecastOverview: ForecastOverview[]
-  highAtStr: any
-  loAtStr: any
-  timeZoneId: string
-  timeFormat: string
-  barometerUnits: string
-  windUnits: string
-  rainUnits: string
-  tempUnits: string
-  temperatureFeelLike: any
-  temperature: string
-  hiTemp: string
-  hiTempDate: number
-  loTemp: string
-  loTempDate: number
-  wind: string
-  gust: string
-  gustAt: number
-  humidity: string
-  rain: string
-  seasonalRain: string
-  barometer: string
-  barometerTrend: string
-  lastReceived: number
-  systemLocation: string
-  aqsLocation: any
-  aqsLastReceived: any
-  thwIndex: string
-  thswIndex: string
-  aqi: any
-  aqiString: any
-  aqiScheme: any
-  noAccess: any
+export interface WeatherResponse {
+  weather: Weather
+  tides: Tide[]
 }
 
-export interface ForecastOverview {
-  date: string
-  morning: Morning
-  afternoon: Afternoon
-  evening: Evening
-  night: Night
+export interface Weather {
+  Bucket: string
+  WindSpeed: number
+  Temperature: number
+  FeelsLike: number
+  WindDirection: number
+  WindDirectionName: string
+  Barometer: number
+  BarometerUnits: string
+  BarometerTrend: string
+  Rain: number
+  RainUnits: string
+  ChanceOfRain: number
+  Humidity: number
+  Forecast: string
 }
 
-export interface Morning {
-  weatherCode: number
-  weatherDesc: string
-  weatherIconUrl: string
-  temp: number
-  chanceofrain: number
-  rainInInches: number
+export interface Tide {
+  Type: number
+  Time: number
+  Height: number
 }
-
-export interface Afternoon {
-  weatherCode: number
-  weatherDesc: string
-  weatherIconUrl: string
-  temp: number
-  chanceofrain: number
-  rainInInches: number
-}
-
-export interface Evening {
-  weatherCode: number
-  weatherDesc: string
-  weatherIconUrl: string
-  temp: number
-  chanceofrain: number
-  rainInInches: number
-}
-
-export interface Night {
-  weatherCode: number
-  weatherDesc: string
-  weatherIconUrl: string
-  temp: number
-  chanceofrain: number
-  rainInInches: number
-}
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class WeatherStationService {
+  private apiUrl = 'https://4w4vljd7q24rgeo7c42afyzpze0xqmhx.lambda-url.eu-west-1.on.aws?current=yes';
+  private cachedData?: Observable<WeatherResponse>;
 
   constructor(private http: HttpClient) {}
 
-  getWeather(): Observable<WeatherStationData> {
-    return this.http.get<WeatherStationData>(RTYC_WEATHER_LINK);
+  getData(hourSpan?: number): Observable<WeatherResponse> {
+    if (!this.cachedData) {
+      this.cachedData = this.http.get<WeatherResponse>(this.apiUrl).pipe(shareReplay(1));
+    }
+    return this.cachedData
   }
 }
