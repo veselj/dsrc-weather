@@ -86,15 +86,11 @@ resource "aws_iam_policy" "lambda_collector_dynamodb_rw" {
           "dynamodb:PutItem",
           "dynamodb:GetItem"
         ]
-        Resource = aws_dynamodb_table.weather_samples.arn
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "dynamodb:PutItem",
-          "dynamodb:GetItem"
+        Resource = [
+          aws_dynamodb_table.weather_samples.arn,
+          aws_dynamodb_table.tide_times.arn,
+          aws_dynamodb_table.weather.arn
         ]
-        Resource = aws_dynamodb_table.tide_times.arn
       }
     ]
   })

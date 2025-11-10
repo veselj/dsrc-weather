@@ -33,13 +33,21 @@ func handler(ctx context.Context, event Event) error {
 		return err
 	}
 
-	tides, err := tides.Scrape()
+	weatherDetail := record.AsWeatherData(weather)
+	log.Printf("Weather details: %+v\n", weatherDetail)
+	err = dynClient.PutWeather(ctx, weather)
+	if err != nil {
+		log.Println("Error saving weather details", err)
+		return err
+	}
+
+	tideTimes, err := tides.Scrape()
 	if err != nil {
 		log.Println("Error scraping tides", err)
 		return err
 	}
-	log.Printf("Tides: %+v\n", tides)
-	err = dynClient.SaveTides(tides)
+	log.Printf("Tides: %+v\n", tideTimes)
+	err = dynClient.SaveTides(tideTimes)
 	if err != nil {
 		log.Println("Error saving tides", err)
 		return err

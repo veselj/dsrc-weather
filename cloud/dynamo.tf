@@ -42,15 +42,29 @@ resource "aws_dynamodb_table" "tide_times" {
     type = "N"
   }
 
-  # attribute {
-  #   name= "Type"
-  #   type = "N"
-  # }
-  #
-  # attribute {
-  #   name= "Height"
-  #   type = "N"
-  # }
+  ttl {
+    attribute_name = "expires_at"
+    enabled        = true
+  }
+  tags = {
+    Environment = "dev"
+    Name        = "TideTimes"
+  }
+}
+
+resource "aws_dynamodb_table" "weather" {
+  name           = "Weather"
+  billing_mode   = "PROVISIONED"
+
+  read_capacity  = 1
+  write_capacity = 1
+
+  hash_key       = "Bucket"
+
+  attribute {
+    name = "Bucket"
+    type = "S"
+  }
 
   ttl {
     attribute_name = "expires_at"
@@ -58,6 +72,6 @@ resource "aws_dynamodb_table" "tide_times" {
   }
   tags = {
     Environment = "dev"
-    Name        = "WeatherSamples"
+    Name        = "Weather"
   }
 }
