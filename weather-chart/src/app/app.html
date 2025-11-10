@@ -1,16 +1,10 @@
-<div class="chart-toggle-container">
-  <label>
-    <input type="radio" name="chartToggle" [(ngModel)]="selectedChart" value="wind" />
-    <span>Wind Chart</span>
-  </label>
-  <label>
-    <input type="radio" name="chartToggle" [(ngModel)]="selectedChart" value="temp" />
-    <span>Temp Chart</span>
-  </label>
-</div>
+<nav class="tabs">
+  <a routerLink="/wind" routerLinkActive="active">
+    <i class="fas fa-wind"></i> Wind Chart
+  </a>
+  <a routerLink="/temp" routerLinkActive="active">
+    <i class="fas fa-thermometer-half"></i> Temp Chart
+  </a>
+</nav>
 
-@if(selectedChart === 'wind') {
-  <app-wind-chart></app-wind-chart>
-} @else {
-  <app-temp-chart></app-temp-chart>
-}
+<router-outlet></router-outlet>

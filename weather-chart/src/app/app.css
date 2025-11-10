@@ -40,3 +40,41 @@
   background-color: #d32f2f; /* Darker red background when selected */
   color: #fff;
 }
+.tabs {
+  display: flex;
+  justify-content: center;
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-bottom: 2px solid #ccc;
+}
+
+.tabs a {
+  text-decoration: none;
+  color: #333;
+  padding: 6px 12px;
+  margin: 0 5px;
+  border-radius: 5px;
+  border: 1px solid transparent; /* Add a border for unselected tabs */
+  background-color: #d8dee4; /* Light background for unselected tabs */
+  transition: background-color 0.3s, color 0.3s, border 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 6px; /* Space between icon and text */
+  font-size: 14px;
+}
+
+.tabs a:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.tabs a.active {
+  background-color: #0056b3;
+  color: #fff;
+  font-weight: bold;
+  border: 1px solid #0056b3; /* Highlight border for active tab */
+}
+
+.tabs a i {
+  font-size: 16px; /* Adjust icon size */
+}
