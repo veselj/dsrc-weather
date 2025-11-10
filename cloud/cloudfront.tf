@@ -38,6 +38,12 @@ resource "aws_cloudfront_distribution" "dsrc_weather" {
     max_ttl                = 600
   }
 
+  custom_error_response {
+    error_code            = 404
+    response_code         = 200
+    response_page_path    = "/index.html"
+  }
+
   price_class = "PriceClass_100"
 
   viewer_certificate {
