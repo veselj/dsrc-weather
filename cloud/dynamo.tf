@@ -35,10 +35,16 @@ resource "aws_dynamodb_table" "tide_times" {
   read_capacity  = 3
   write_capacity = 3
 
-  hash_key       = "When"
+  hash_key       = "Bucket"
+  range_key = "Time"
 
   attribute {
-    name = "When"
+    name = "Bucket"
+    type = "S"
+  }
+
+  attribute {
+    name = "Time"
     type = "N"
   }
 

@@ -69,7 +69,11 @@ resource "aws_iam_policy" "lambda_data_dynamodb_r" {
           "dynamodb:GetItem",
           "dynamodb:Query"
         ]
-        Resource = aws_dynamodb_table.weather_samples.arn
+        Resource = [
+          aws_dynamodb_table.weather_samples.arn,
+          aws_dynamodb_table.tide_times.arn,
+          aws_dynamodb_table.weather.arn
+        ]
       }
     ]
   })

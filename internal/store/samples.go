@@ -69,7 +69,7 @@ func (c *DynamoClient) Samples(ctx context.Context, fromUnix int64) []record.Sam
 	}
 
 	// Execute query
-	result, err := c.client.Query(context.TODO(), &dynamodb.QueryInput{
+	result, err := c.client.Query(ctx, &dynamodb.QueryInput{
 		TableName:                 aws.String(c.sampleTableName),
 		KeyConditionExpression:    aws.String(keyCond),
 		ExpressionAttributeNames:  exprAttrNames,

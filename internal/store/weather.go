@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/veselj/dsrc-weather/internal/record"
 	"github.com/veselj/dsrc-weather/weather-collector/weather/station"
 )
@@ -57,4 +58,28 @@ func (c *DynamoClient) PutWeather(
 		Item:      item,
 	})
 	return err
+}
+
+func (c *DynamoClient) GetWeather(ctx context.Context) (*record.WeatherDetails, error) {
+	now := time.Now()
+	partitionKeyValue := now.Format(record.BucketFormat)
+
+	result, err := c.client.GetItem(ctx, &dynamodb.GetItemInput{
+		TableName: aws.String(c.weatherTableName),
+		Key: map[string]types.AttributeValue{
+			"Bucket": &types.AttributeValueMemberS{Value: partitionKeyValue},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	if result.Item == nil {
+		return nil, nil
+	}
+	var weather record.WeatherDetails
+	err = attributevalue.UnmarshalMap(result.Item, &weather)
+	if err != nil {
+		return nil, err
+	}
+	return &weather, nil
 }

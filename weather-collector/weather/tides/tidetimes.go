@@ -16,7 +16,7 @@ const (
 
 type Tide struct {
 	Type   int
-	Time   time.Time
+	Time   int64 // Unix timestamp
 	Height float64
 }
 
@@ -69,7 +69,7 @@ func parseTideType(tideType string) int {
 	return -1
 }
 
-func parseTideTime(tideTime string) time.Time {
+func parseTideTime(tideTime string) int64 {
 	loc, err := time.LoadLocation("Europe/London")
 	if err != nil {
 		loc = time.UTC
@@ -77,13 +77,13 @@ func parseTideTime(tideTime string) time.Time {
 	now := time.Now().In(loc)
 	parsed, err := time.ParseInLocation("15:04", tideTime, loc)
 	if err != nil {
-		return time.Time{}
+		return time.Time{}.Unix()
 	}
 	// Combine today's date with parsed hour and minute
 	return time.Date(
 		now.Year(), now.Month(), now.Day(),
 		parsed.Hour(), parsed.Minute(), 0, 0, loc,
-	)
+	).Unix()
 }
 
 func parseTideHeight(tideHeight string) float64 {

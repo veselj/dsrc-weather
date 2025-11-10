@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -12,6 +11,15 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/veselj/dsrc-weather/weather-collector/weather/tides"
 )
+
+const (
+	TideBucketFormat = "20060102"
+)
+
+// Daily buckets
+func AsTidesBucket(t int64) string {
+	return time.Unix(t, 0).Format(TideBucketFormat)
+}
 
 func (c *DynamoClient) PutTides(ctx context.Context, tides []tides.Tide) error {
 	t, err := c.GetTides(ctx)
@@ -22,12 +30,14 @@ func (c *DynamoClient) PutTides(ctx context.Context, tides []tides.Tide) error {
 
 	for _, tide := range tides {
 		item, err := attributevalue.MarshalMap(struct {
-			When      int64   `dynamodbav:"When"`
+			Bucket    string  `dynamodbav:"Bucket"`
+			Time      int64   `dynamodbav:"Time"`
 			Type      int     `dynamodbav:"Type"`
 			Height    float64 `dynamodbav:"Height"`
 			ExpiresAt int64   `dynamodbav:"expires_at"`
 		}{
-			When:      tide.Time.Unix(),
+			Bucket:    AsTidesBucket(tide.Time),
+			Time:      tide.Time,
 			Type:      tide.Type,
 			Height:    tide.Height,
 			ExpiresAt: time.Now().Add(time.Hour * 24 * 14).Unix(), // 14 days expiration
@@ -53,16 +63,13 @@ func (c *DynamoClient) GetTides(ctx context.Context) ([]tides.Tide, error) {
 		loc = time.UTC
 	}
 	now := time.Now().In(loc)
-	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
-	endOfDay := startOfDay.Add(24 * time.Hour)
 
-	keyCond := "#When BETWEEN :start AND :end"
+	keyCond := "#Bucket = :bucket"
 	exprAttrNames := map[string]string{
-		"#When": "When",
+		"#Bucket": "Bucket",
 	}
 	exprAttrValues := map[string]types.AttributeValue{
-		":start": &types.AttributeValueMemberN{Value: strconv.FormatInt(startOfDay.Unix(), 10)},
-		":end":   &types.AttributeValueMemberN{Value: strconv.FormatInt(endOfDay.Unix()-1, 10)},
+		":bucket": &types.AttributeValueMemberS{Value: AsTidesBucket(now.Unix())},
 	}
 
 	result, err := c.client.Query(ctx, &dynamodb.QueryInput{

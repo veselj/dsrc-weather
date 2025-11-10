@@ -1,6 +1,8 @@
 package store
 
 import (
+	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -20,4 +22,11 @@ func Test_getHourlyBucketsOneHourBefore(t *testing.T) {
 func Test_getHourlyBucketsTwoHourBefore(t *testing.T) {
 	starts := GetHourlyBucketStarts(time.Now().Add(-2 * time.Hour).Unix())
 	assert.Equal(t, 3, len(starts))
+}
+
+func TestDynamoClient_GetTides(t *testing.T) {
+	client := NewDynamoClient()
+	tides, err := client.GetTides(context.Background())
+	assert.Nil(t, err)
+	fmt.Printf("%v", tides)
 }
