@@ -10,6 +10,7 @@ export interface WeatherResponse {
 
 export interface Weather {
   Bucket: string
+  When: number // Unix timestamp in milliseconds
   WindSpeed: number
   Temperature: number
   FeelsLike: number

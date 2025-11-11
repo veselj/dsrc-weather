@@ -1,7 +1,7 @@
 <div>
   @if(weatherData && weatherData.weather && weatherData.tides) {
-    <h2>Grassy Beach Weather</h2>
-      <div><b>{{  currentTime() | date:'EEEE, MMMM d, y, HH:mm' }}</b></div>
+    <h2>Weather at Grassy Beach</h2>
+      <div><b>{{  sampleTime() | date:'EEEE, MMMM d, y, HH:mm:ss' }}</b></div>
   <table>
     <thead>
     <tr>

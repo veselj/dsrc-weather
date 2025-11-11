@@ -2,24 +2,26 @@
   @if(weatherData && weatherData.weather && weatherData.tides) {
     <a href="https://www.tidetimes.org.uk/dundee-tide-times" target="_blank" rel="noopener noreferrer">
       <h2>Dundee Tide Times</h2>
+      <div><b>{{  sampleTime() | date:'EEEE, MMMM d, y, HH:mm:ss' }}</b></div>
     </a>
     <table>
       <thead>
       <tr>
-        <th>Tide Type</th>
-        <th>Time</th>
+        <th>Tide</th>
         <th>Height</th>
-        <th>Tide Change</th>
+        <th>Time</th>
+        <th>Change</th>
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let tide of weatherData.tides; let i = index"
-          [ngClass]="{'highlight': i === getNextTideIndex()}">
-        <td>{{ tide.Type === 0 ? 'Low' : 'High' }}</td>
-        <td>{{ tide.Time * 1000 | date:'shortTime' | lowercase }}</td>
-        <td>{{ tide.Height | number:'1.2-2' }} m</td>
-        <td>{{ getTimeRemaining(tide.Time) }}</td>
-      </tr>
+      @for(tide of weatherData.tides; track tide) {
+        <tr [ngClass]="{'highlight': $index === getNextTideIndex()}">
+          <td>{{ tide.Type === 0 ? 'Low' : 'High' }}</td>
+          <td>{{ tide.Height | number:'1.2-2' }} m</td>
+          <td>{{ tide.Time * 1000 | date:'shortTime' | lowercase }}</td>
+          <td>{{ getTimeRemaining(tide.Time) }}</td>
+        </tr>
+      }
       </tbody>
     </table>
   }

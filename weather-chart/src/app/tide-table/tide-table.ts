@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import {WeatherResponse, WeatherStationService} from '../services/weather-station-service';
-import { DecimalPipe, CommonModule} from '@angular/common';
+import { CommonModule} from '@angular/common';
 
 @Component({
   selector: 'app-tide-table',
   standalone: true,
-  imports: [DecimalPipe, CommonModule],
+  imports: [CommonModule],
   templateUrl: './tide-table.html',
   styleUrl: './tide-table.css'
 })
@@ -42,6 +42,10 @@ export class TideTable {
 
   currentTime(): Date {
     return new Date();
+  }
+
+  sampleTime() : Date {
+    return this.weatherData?.weather?.When ? new Date(this.weatherData.weather.When) : new Date();
   }
 
 }

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import {WeatherResponse, WeatherStationService} from '../services/weather-station-service';
 import { DecimalPipe, CommonModule } from '@angular/common';
+import {sampleTime} from 'rxjs';
 
 @Component({
   selector: 'app-weather-station',
@@ -20,6 +21,10 @@ export class WeatherStation {
 
   currentTime(): Date {
     return new Date();
+  }
+
+  sampleTime() : Date {
+    return this.weatherData?.weather?.When ? new Date(this.weatherData.weather.When) : new Date();
   }
 
 }
