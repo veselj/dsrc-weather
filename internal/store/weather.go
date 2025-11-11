@@ -18,6 +18,7 @@ func (c *DynamoClient) PutWeather(
 	wDetails := record.AsWeatherData(stationData)
 	item, err := attributevalue.MarshalMap(struct {
 		Bucket            string  `dynamodbav:"Bucket"`
+		When              int64   `dynamodbav:"When"`
 		WindSpeed         float64 `dynamodbav:"WindSpeed"`
 		Temperature       float64 `dynamodbav:"Temperature"`
 		FeelsLike         float64 `dynamodbav:"FeelsLike"`
@@ -34,6 +35,7 @@ func (c *DynamoClient) PutWeather(
 		ExpiresAt         int64   `dynamodbav:"expires_at"`
 	}{
 		Bucket:            wDetails.Bucket,
+		When:              wDetails.When,
 		WindSpeed:         wDetails.WindSpeed,
 		Temperature:       wDetails.Temperature,
 		FeelsLike:         wDetails.FeelsLike,

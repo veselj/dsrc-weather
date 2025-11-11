@@ -93,6 +93,7 @@ func AsWeatherData(w *station.WeatherData) *WeatherDetails {
 
 	return &WeatherDetails{
 		Bucket:            asBucket(time.Now()),
+		When:              w.LastReceived,
 		WindSpeed:         asKnots(w.Wind, w.WindUnits),
 		Temperature:       asDegrees(w.Temperature),
 		FeelsLike:         asDegrees(w.TemperatureFeelLike),

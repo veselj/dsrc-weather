@@ -15,6 +15,7 @@ const (
 
 type WeatherDetails struct {
 	Bucket            string
+	When              int64 // Unix timestamp
 	WindSpeed         float64
 	Temperature       float64
 	FeelsLike         float64
