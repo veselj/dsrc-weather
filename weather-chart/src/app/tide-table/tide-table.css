@@ -36,5 +36,5 @@ p {
 }
 
 .highlight {
-  background-color: #e1d997;
+  background-color: #e1d997 !important;
 }

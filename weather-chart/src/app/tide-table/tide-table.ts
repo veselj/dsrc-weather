@@ -19,25 +19,30 @@ export class TideTable {
   }
 
   getNextTideIndex(): number | null {
-    const currentTime = Date.now();
+    const currentTime = Date.now() / 1000;
     if (this.weatherData?.tides) {
-      return this.weatherData.tides.findIndex(tide => tide.Time * 1000 > currentTime);
+      const index = this.weatherData.tides.findIndex(tide => tide.Time  > currentTime);
+      return index;
     }
     return null;
   }
 
   getTimeRemaining(tideTime: number): string {
-    const currentTime = Date.now();
-    const timeDiff = tideTime * 1000 - currentTime;
+    const currentTime = Date.now() / 1000;
+    const timeDiff = tideTime - currentTime;
 
-    const hours = Math.floor(Math.abs(timeDiff) / (1000 * 60 * 60));
-    const minutes = Math.floor((Math.abs(timeDiff) % (1000 * 60 * 60)) / (1000 * 60));
+    const hours = Math.floor(Math.abs(timeDiff) / 3600);
+    const minutes = Math.floor((Math.abs(timeDiff) % 3600) / 60);
 
+    let prefix = '';
+    if (hours > 0) {
+       prefix = `${hours}h `;
+    }
     if (timeDiff <= 0) {
-      return `-${hours}h ${minutes}m`;
+      return `-${prefix}${minutes}m`;
     }
 
-    return `${hours}h ${minutes}m`;
+    return `${prefix}${minutes}m`;
   }
 
   currentTime(): Date {
