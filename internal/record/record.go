@@ -35,14 +35,16 @@ func asDegrees(temper string) float64 {
 	return value
 }
 
-func asKnots(mph string, windUnit string) float64 {
+func asKnots(windValue string, windUnit string) float64 {
+	speed, err := strconv.ParseFloat(windValue, 64)
+	if err != nil {
+		return 0
+	}
 	if windUnit == "mph" {
-		speed, err := strconv.ParseFloat(mph, 64)
-		if err != nil {
-			return 0
-		}
 		speedKn := speed * 0.8689758
 		return speedKn
+	} else if windUnit == "knots" {
+		return speed
 	}
 	return 0
 }
