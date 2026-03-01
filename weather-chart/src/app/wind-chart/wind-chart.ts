@@ -178,6 +178,8 @@ export class WindChart implements OnInit, OnDestroy {
       pointHoverRadius = 0
     }
 
+    const hideMinuteData = hoursBack >= 3;
+
     return {
       datasets: [
         {
@@ -189,7 +191,8 @@ export class WindChart implements OnInit, OnDestroy {
           backgroundColor: 'rgba(25, 118, 210, 0.2)',
           pointBackgroundColor: '#1976d2',
           pointRadius: pointRadius,
-          pointHoverRadius: pointHoverRadius
+          pointHoverRadius: pointHoverRadius,
+          hidden: hideMinuteData
         },
         {
           label: 'Moving Average (last 10 minutes)',
