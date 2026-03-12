@@ -1,6 +1,6 @@
 resource "aws_acm_certificate" "dsrc_weather" {
   domain_name               = "dsrc-weather.laetus.uk"
-  subject_alternative_names = []
+  subject_alternative_names = ["rtyc-weather.laetus.uk"]
   validation_method         = "DNS"
   provider          = aws.virginia
 
@@ -9,6 +9,6 @@ resource "aws_acm_certificate" "dsrc_weather" {
   }
 
   tags = {
-    Name = "Dsrc Weather ACM Certificate"
+    Name = "Dsrc/Rtyc Weather ACM Certificate"
   }
 }

@@ -19,7 +19,7 @@ resource "aws_cloudfront_distribution" "dsrc_weather" {
     origin_access_control_id = aws_cloudfront_origin_access_control.dsrc_weather_oac.id
   }
 
-  aliases = ["dsrc-weather.laetus.uk"]
+  aliases = ["dsrc-weather.laetus.uk", "rtyc-weather.laetus.uk"]
 
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD", "OPTIONS"]
