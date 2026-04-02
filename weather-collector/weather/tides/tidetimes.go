@@ -33,29 +33,31 @@ func Scrape() ([]Tide, error) {
 	}
 
 	tides := []Tide{}
-	doc.Find("table").EachWithBreak(func(_ int, table *goquery.Selection) bool {
-		header := table.Find("thead tr th").First().Text()
-		if strings.Contains(header, "Tide Times") {
-			table.Find("tr").Each(func(i int, row *goquery.Selection) {
-				cells := row.Find("td")
-				if cells.Length() == 3 {
-					tideType := parseTideType(strings.TrimSpace(cells.Eq(0).Text()))
-					if tideType == -1 {
-						return
-					}
-					tideTime := parseTideTime(strings.TrimSpace(cells.Eq(1).Find("span").Text()))
-					height := parseTideHeight(strings.TrimSpace(cells.Eq(2).Text()))
-					tides = append(tides, Tide{
-						Type:   tideType,
-						Time:   tideTime,
-						Height: height,
-					})
+	
+	tidesDiv := doc.Find("div#tides")
+	if tidesDiv.Length() > 0 {
+		table := tidesDiv.Find("table").First()
+		table.Find("tr").Each(func(i int, row *goquery.Selection) {
+			// Skip rows with class "vis0"
+			if row.HasClass("vis0") {
+				return
+			}
+			cells := row.Find("td")
+			if cells.Length() == 3 {
+				tideType := parseTideType(strings.TrimSpace(cells.Eq(0).Text()))
+				if tideType == -1 {
+					return
 				}
-			})
-			return false // Stop after finding the correct table
-		}
-		return true
-	})
+				tideTime := parseTideTime(strings.TrimSpace(cells.Eq(1).Find("span").Text()))
+				height := parseTideHeight(strings.TrimSpace(cells.Eq(2).Text()))
+				tides = append(tides, Tide{
+					Type:   tideType,
+					Time:   tideTime,
+					Height: height,
+				})
+			}
+		})
+	}
 
 	return tides, nil
 }
