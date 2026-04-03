@@ -22,6 +22,12 @@ func AsTidesBucket(t int64) string {
 }
 
 func (c *DynamoClient) PutTides(ctx context.Context, tides []tides.Tide) error {
+	// Possibly at midnight the site is confused and has mixture
+	// of previous day tides and new day tides
+	if len(tides) > 4 {
+		return nil
+	}
+
 	t, err := c.GetTides(ctx)
 	if err == nil && len(t) > 0 {
 		log.Printf("Tides already exist in the database, skipping insert")
